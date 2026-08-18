@@ -11,6 +11,7 @@ Anonymised sample reports published as static HTML pages.
 | `index.html` | Landing page — links to every report |
 | `executive-scorecard.html` | Company-level monthly scorecard (3 pages) |
 | `network-pl-cashflow.html` | Multi-location P&L, cash flow, unit economics (3 pages) |
+| `cinema-bi-demo.html` | Cinema operator BI mock-up, 7 views, Ukrainian (Chart.js inlined) |
 | `favicon.ico`, `apple-touch-icon.png` | Icons |
 
 ## Before adding anything

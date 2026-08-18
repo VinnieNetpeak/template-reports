@@ -4,42 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Restaurant Network — P&amp;L and Cash Flow Dashboard (Sample)</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<meta name="theme-color" content="#faf7f2">
 <style>
 :root{
-  --surface:#0b1416; --panel:#111b1d; --panel-2:#15211f; --line:#1e2c2e; --axis:#33454a;
-  --ink:#ffffff; --ink-2:#9fb0ae; --ink-3:#7d8f8d;
-  --good:#35c48d; --bad:#f0705e;
-  --s1:#d95926; --s2:#199e70; --s3:#9085e9; --s4:#c98500; --s5:#d55181;
-  --c-blue:#c98500; --c-teal:#199e70; --c-green:#9085e9; --c-purple:#d55181;
+  --surface:#faf7f2; --panel:#ffffff; --panel-2:#f5efe7; --line:#ece3d8; --axis:#c9bdb0;
+  --ink:#1a1513; --ink-2:#5c534b; --ink-3:#8b8078;
+  --good:#0f7a52; --bad:#c0392b;
+  --s1:#c9591b; --s2:#12876a; --s3:#5f46c9; --s4:#a97300; --s5:#b8437a;
+  --c-blue:#a97300; --c-teal:#12876a; --c-green:#5f46c9; --c-purple:#b8437a;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--surface);color:var(--ink);
   font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
 .app{display:grid;grid-template-columns:196px 1fr;min-height:100vh}
 /* ---------- sidebar ---------- */
-.side{background:#081011;border-right:1px solid var(--line);padding:14px 0 24px}
+.side{background:#f3ece3;border-right:1px solid var(--line);padding:14px 0 24px}
 .brandmark{padding:0 16px 16px;font-size:11px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase}
 .side nav{display:flex;flex-direction:column}
 .side button{background:none;border:0;color:var(--ink-2);text-align:left;padding:10px 16px;
   font:inherit;font-size:12.5px;cursor:pointer;border-left:3px solid transparent;line-height:1.35}
-.side button:hover{color:var(--ink);background:#0d1718}
-.side button[aria-current="true"]{color:var(--ink);border-left-color:var(--s1);background:#0f1b1c;font-weight:bold}
-.side .muted{color:#46595a;cursor:not-allowed}
-.side .muted:hover{background:none;color:#46595a}
-.side .grp{padding:16px 16px 6px;font-size:10px;letter-spacing:.12em;color:#46595a;text-transform:uppercase}
+.side button:hover{color:var(--ink);background:#ece3d8}
+.side button[aria-current="true"]{color:var(--ink);border-left-color:var(--s1);background:#ffffff;font-weight:bold}
+.side .muted{color:#b3a89d;cursor:not-allowed}
+.side .muted:hover{background:none;color:#b3a89d}
+.side .grp{padding:16px 16px 6px;font-size:10px;letter-spacing:.12em;color:#a1958a;text-transform:uppercase}
 /* ---------- topbar ---------- */
 .main{min-width:0;padding:0 28px 56px}
 .top{display:flex;align-items:center;gap:16px;padding:16px 0 10px;position:sticky;top:0;background:var(--surface);z-index:5}
 .seg{display:flex;gap:6px}
-.seg button{background:#172224;border:1px solid #253434;color:var(--ink-2);font:inherit;font-size:10.5px;
+.seg button{background:#ffffff;border:1px solid var(--line);color:var(--ink-2);font:inherit;font-size:10.5px;
   letter-spacing:.1em;padding:6px 14px;border-radius:3px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:#274440;color:#fff;border-color:#35564f}
+.seg button[aria-pressed="true"]{background:#3a322c;color:#fff;border-color:#3a322c}
 .top h1{flex:1;text-align:center;margin:0;font-size:17px;letter-spacing:.22em;font-weight:bold}
 .ctl{display:flex;align-items:center;gap:8px}
 .ctl label{font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
-select,.tbtn{background:#172224;border:1px solid #253434;color:var(--ink);font:inherit;font-size:12px;
+select,.tbtn{background:#ffffff;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:12px;
   padding:6px 10px;border-radius:3px;cursor:pointer}
-.rule{height:1px;background:linear-gradient(90deg,#253434,rgba(37,52,52,0));margin:2px 0 18px}
+.rule{height:1px;background:linear-gradient(90deg,#ddd2c4,rgba(221,210,196,0));margin:2px 0 18px}
 /* ---------- sections ---------- */
 .sec{margin:0 0 34px}
 .sec > h2{margin:0 0 14px;font-size:11px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;font-weight:bold}
@@ -47,7 +49,7 @@ select,.tbtn{background:#172224;border:1px solid #253434;color:var(--ink);font:i
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
-.card{background:var(--panel);border:1px solid #1a2729;border-radius:8px;padding:16px 16px 10px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 16px 10px;min-width:0;box-shadow:0 1px 2px rgba(60,45,30,.04)}
 .klab{font-size:12.5px;color:var(--ink-2);margin:0 0 8px;line-height:1.3;min-height:2.6em}
 .kval{font-size:30px;font-weight:bold;letter-spacing:-.01em;line-height:1.05}
 .krow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:7px}
@@ -68,29 +70,29 @@ svg{display:block;width:100%;overflow:visible}
 .legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 8px;font-size:11.5px;color:var(--ink-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
-.tip{position:fixed;pointer-events:none;background:#081011;border:1px solid #253434;border-radius:5px;
-  padding:8px 10px;font-size:11.5px;color:var(--ink);z-index:50;opacity:0;transition:opacity .08s;box-shadow:0 6px 22px rgba(0,0,0,.55);white-space:nowrap}
+.tip{position:fixed;pointer-events:none;background:#ffffff;border:1px solid var(--line);border-radius:5px;
+  padding:8px 10px;font-size:11.5px;color:var(--ink);z-index:50;opacity:0;transition:opacity .08s;box-shadow:0 8px 24px rgba(60,45,30,.16);white-space:nowrap}
 .tip b{display:block;color:var(--ink-3);font-weight:normal;font-size:10.5px;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .tip .r{display:flex;align-items:center;gap:7px;line-height:1.5}
 table.dt{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;color:var(--ink-2)}
-table.dt th,table.dt td{border-bottom:1px solid #1a2729;padding:4px 6px;text-align:right;white-space:nowrap}
+table.dt th,table.dt td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right;white-space:nowrap}
 table.dt th:first-child,table.dt td:first-child{text-align:left;color:var(--ink)}
 table.dt thead th{color:var(--ink-3);font-weight:normal}
 .hidden{display:none}
 .bars{display:grid;gap:9px;margin-top:6px}
 .brow{display:grid;grid-template-columns:130px 1fr 78px;align-items:center;gap:12px}
 .bname{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.btrack{position:relative;height:16px;background:#0e1a1b;border-radius:4px;overflow:visible}
+.btrack{position:relative;height:16px;background:#f0e8dd;border-radius:4px;overflow:visible}
 .bfill{height:100%;border-radius:4px}
 .bval{font-size:12.5px;font-weight:bold;text-align:right;white-space:nowrap}
-.btgt{position:absolute;top:-4px;bottom:-4px;width:0;border-left:1px dashed #8aa09d}
+.btgt{position:absolute;top:-4px;bottom:-4px;width:0;border-left:1px dashed #9c8f84}
 .btgtlab{font-size:10px;color:var(--ink-3);margin-top:4px}
-.note{margin:34px 0 0;padding:14px 16px;border:1px dashed #253434;border-radius:8px;color:var(--ink-3);font-size:11.5px;line-height:1.6}
+.note{margin:34px 0 0;padding:14px 16px;border:1px dashed #d8ccbd;border-radius:8px;color:var(--ink-3);font-size:11.5px;line-height:1.6}
 .note b{color:var(--ink-2)}
 @media (max-width:1100px){.app{grid-template-columns:1fr}.side{display:none}.g3,.g4{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
 </style>
 </head>
-<body data-palette="#d95926,#199e70,#9085e9,#c98500,#d55181">
+<body data-palette="#c9591b,#12876a,#5f46c9,#a97300,#b8437a">
 <div class="app">
   <aside class="side">
     <div class="brandmark">Network P&amp;L</div>
@@ -217,7 +219,7 @@ function chart(series, fmt, opts){
   let s = `<svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" role="img" aria-label="Trend chart" style="height:${H}px">
     <defs>`;
   series.forEach((se,k)=>{ s += `<linearGradient id="${id}_${k}" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0" stop-color="${se.color}" stop-opacity=".40"/>
+      <stop offset="0" stop-color="${se.color}" stop-opacity=".28"/>
       <stop offset="1" stop-color="${se.color}" stop-opacity="0"/></linearGradient>`; });
   s += `</defs>`;
   ticks.forEach(t => { s += `<line x1="0" x2="100" y1="${Y(t).toFixed(2)}" y2="${Y(t).toFixed(2)}"
@@ -230,7 +232,7 @@ function chart(series, fmt, opts){
     s += `<path d="${p}" fill="none" stroke="${se.color}" stroke-width="2" vector-effect="non-scaling-stroke"
         stroke-linecap="round" stroke-linejoin="round"/>`;
   });
-  s += `<line class="cross" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#8aa09d" stroke-width="1"
+  s += `<line class="cross" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#9c8f84" stroke-width="1"
       stroke-dasharray="2 2" vector-effect="non-scaling-stroke" opacity="0"/></svg>`;
   // HTML label layer — readable at any width
   let lab = '';
