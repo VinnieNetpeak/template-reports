@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report Templates</title>
+  <meta name="description" content="Anonymised sample management and financial reports built by Netpeak Digital Data.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--ink-2:#475569;--ink-3:#64748b;
+          --accent:#0ea5e9;--accent-2:#0284c7;--line:#e2e8f0;--card:#ffffff;}
+    *{box-sizing:border-box}
+    body{font-family:Arial,sans-serif;background:var(--bg);color:var(--ink);
+         margin:0;padding:56px 20px 40px;text-align:center;}
+    .wrap{max-width:1000px;margin:0 auto;}
+    h1{margin:0 0 10px;font-size:32px;}
+    .sub{margin:0 auto 36px;max-width:620px;color:var(--ink-2);line-height:1.6;}
+    .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));text-align:left;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;
+          display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+    .card h2{margin:0 0 8px;font-size:19px;}
+    .card p{margin:0 0 16px;color:var(--ink-2);font-size:14.5px;line-height:1.6;flex:1;}
+    .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;}
+    .tag{font-size:11.5px;color:var(--ink-3);background:#f1f5f9;border:1px solid var(--line);
+         border-radius:999px;padding:3px 10px;}
+    a.button{display:inline-block;padding:12px 24px;font-size:16px;color:#fff;background:var(--accent);
+             border-radius:8px;text-decoration:none;transition:background .2s;text-align:center;}
+    a.button:hover{background:var(--accent-2);}
+    .card a.button{align-self:flex-start;padding:10px 20px;font-size:15px;}
+    .note{margin:36px auto 0;max-width:720px;border:1px dashed #cbd5e1;border-radius:10px;
+          padding:16px 20px;color:var(--ink-3);font-size:13.5px;line-height:1.65;text-align:left;}
+    .note b{color:var(--ink-2);}
+    footer{margin-top:40px;font-size:.9rem;color:var(--ink-3);}
+    footer a{color:var(--ink-3);}
+    @media (max-width:600px){body{padding:36px 16px}h1{font-size:26px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Report Templates</h1>
+    <p class="sub">Anonymised sample reports built by Netpeak Digital Data.
+       Every figure is synthetic — the templates show structure, metric logic and layout, not client data.</p>
+
+    <div class="grid">
+
+      <div class="card">
+        <h2>Executive Scorecard</h2>
+        <p>Company-level monthly scorecard: revenue streams and mix, EBITDA, working capital,
+           cost efficiency, unit economics and CAC payback across two business units.</p>
+        <div class="tags"><span class="tag">Company metrics</span><span class="tag">Finance</span><span class="tag">Sales &amp; Marketing</span></div>
+        <a class="button" href="executive-scorecard.html">Open report</a>
+      </div>
+
+      <div class="card">
+        <h2>Network P&amp;L and Cash Flow</h2>
+        <p>Multi-location operator: P&amp;L with prime cost breakdown, cash flow against EBITDA,
+           investment return and liquidity ratios, plus per-unit and per-channel comparison.</p>
+        <div class="tags"><span class="tag">P&amp;L</span><span class="tag">Cash flow</span><span class="tag">Unit economics</span></div>
+        <a class="button" href="network-pl-cashflow.html">Open report</a>
+      </div>
+
+    </div>
+
+    <p class="note"><b>Note on data.</b> All names, segments, locations, channels and figures in these
+      templates are synthetic and generated for demonstration. They do not correspond to any client's
+      actual results, and no client, brand, market or product identifier is present.</p>
+
+    <footer>© <span id="year"></span> Netpeak · Digital Data</footer>
+  </div>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive Scorecard — Sample Report</title>
+<style>
+:root{
+  --surface:#0d1117; --panel:#131a23; --panel-2:#171f2a; --line:#1f2937; --axis:#374151;
+  --ink:#ffffff; --ink-2:#9aa7b8; --ink-3:#6b7787;
+  --good:#2FB787; --bad:#e05c4b;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  --c-purple:#8973CD; --c-blue:#3369CA; --c-teal:#0C778B; --c-green:#2FB787;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--surface);color:var(--ink);
+  font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:196px 1fr;min-height:100vh}
+/* ---------- sidebar ---------- */
+.side{background:#0a0e14;border-right:1px solid var(--line);padding:14px 0 24px}
+.brandmark{padding:0 16px 16px;font-size:11px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase}
+.side nav{display:flex;flex-direction:column}
+.side button{background:none;border:0;color:var(--ink-2);text-align:left;padding:10px 16px;
+  font:inherit;font-size:12.5px;cursor:pointer;border-left:3px solid transparent;line-height:1.35}
+.side button:hover{color:var(--ink);background:#0f151d}
+.side button[aria-current="true"]{color:var(--ink);border-left-color:var(--c-purple);background:#111823;font-weight:bold}
+.side .muted{color:#4a5563;cursor:not-allowed}
+.side .muted:hover{background:none;color:#4a5563}
+.side .grp{padding:16px 16px 6px;font-size:10px;letter-spacing:.12em;color:#4a5563;text-transform:uppercase}
+/* ---------- topbar ---------- */
+.main{min-width:0;padding:0 28px 56px}
+.top{display:flex;align-items:center;gap:16px;padding:16px 0 10px;position:sticky;top:0;background:var(--surface);z-index:5}
+.seg{display:flex;gap:6px}
+.seg button{background:#1c232d;border:1px solid #2a3341;color:var(--ink-2);font:inherit;font-size:10.5px;
+  letter-spacing:.1em;padding:6px 14px;border-radius:3px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#3E3C3A;color:#fff;border-color:#4b4845}
+.top h1{flex:1;text-align:center;margin:0;font-size:17px;letter-spacing:.22em;font-weight:bold}
+.ctl{display:flex;align-items:center;gap:8px}
+.ctl label{font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+select,.tbtn{background:#1c232d;border:1px solid #2a3341;color:var(--ink);font:inherit;font-size:12px;
+  padding:6px 10px;border-radius:3px;cursor:pointer}
+.rule{height:1px;background:linear-gradient(90deg,#2a3341,rgba(42,51,65,0));margin:2px 0 18px}
+/* ---------- sections ---------- */
+.sec{margin:0 0 34px}
+.sec > h2{margin:0 0 14px;font-size:11px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;font-weight:bold}
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid #1c2531;border-radius:8px;padding:16px 16px 10px;min-width:0}
+.klab{font-size:12.5px;color:var(--ink-2);margin:0 0 8px;line-height:1.3;min-height:2.6em}
+.kval{font-size:30px;font-weight:bold;letter-spacing:-.01em;line-height:1.05}
+.krow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:7px}
+.kdelta{font-size:12.5px;font-weight:bold}
+.kdelta.up{color:var(--good)} .kdelta.down{color:var(--bad)}
+.kroll{font-size:11px;color:var(--ink-3)}
+.chart{margin-top:12px;position:relative;padding-left:46px;padding-bottom:20px}
+.ylab,.xlab,.elab{position:absolute;font-size:10px;color:var(--ink-3);white-space:nowrap;pointer-events:none}
+.ylab{left:0;width:40px;text-align:right;transform:translateY(-50%)}
+.xlab{bottom:2px;transform:translateX(-50%)}
+.elab{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-2);transform:translateY(-50%);background:var(--panel);padding:1px 4px;border-radius:3px}
+.elab i{width:7px;height:7px;border-radius:2px;flex:0 0 auto}
+.dot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 0 2px var(--panel);pointer-events:none}
+.hdot{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 0 2.5px var(--panel);pointer-events:none;opacity:0;transition:opacity .08s}
+svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 8px;font-size:11.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tip{position:fixed;pointer-events:none;background:#0a0e14;border:1px solid #2a3341;border-radius:5px;
+  padding:8px 10px;font-size:11.5px;color:var(--ink);z-index:50;opacity:0;transition:opacity .08s;box-shadow:0 6px 22px rgba(0,0,0,.55);white-space:nowrap}
+.tip b{display:block;color:var(--ink-3);font-weight:normal;font-size:10.5px;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
+.tip .r{display:flex;align-items:center;gap:7px;line-height:1.5}
+table.dt{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;color:var(--ink-2)}
+table.dt th,table.dt td{border-bottom:1px solid #1c2531;padding:4px 6px;text-align:right;white-space:nowrap}
+table.dt th:first-child,table.dt td:first-child{text-align:left;color:var(--ink)}
+table.dt thead th{color:var(--ink-3);font-weight:normal}
+.hidden{display:none}
+.note{margin:34px 0 0;padding:14px 16px;border:1px dashed #2a3341;border-radius:8px;color:var(--ink-3);font-size:11.5px;line-height:1.6}
+.note b{color:var(--ink-2)}
+@media (max-width:1100px){.app{grid-template-columns:1fr}.side{display:none}.g3,.g4{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-palette="#3987e5,#d95926,#199e70,#c98500,#d55181">
+<div class="app">
+  <aside class="side">
+    <div class="brandmark">Scorecard</div>
+    <div class="grp">Monthly</div>
+    <nav id="nav"></nav>
+    <div class="grp">Weekly</div>
+    <nav>
+      <button class="muted" disabled>Company metrics</button>
+      <button class="muted" disabled>Finance</button>
+      <button class="muted" disabled>Sales &amp; Marketing</button>
+      <button class="muted" disabled>Operations</button>
+      <button class="muted" disabled>Technology &amp; data</button>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div class="seg">
+        <button aria-pressed="true">MONTHLY</button>
+        <button aria-pressed="false" disabled title="Not included in this sample">WEEKLY</button>
+      </div>
+      <h1 id="ptitle">COMPANY METRICS</h1>
+      <div class="ctl">
+        <label for="period">Period</label>
+        <select id="period"><option>Last 12 months</option><option>Last 6 months</option><option>Year to date</option></select>
+        <button class="tbtn" id="tt" aria-pressed="false">Data tables</button>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <div id="page"></div>
+    <p class="note">
+      <b>Sample report.</b> Layout and metric structure reproduce a live executive scorecard built by Netpeak Digital Data.
+      All figures, series and segment names are synthetic and generated for demonstration — they do not correspond to any
+      client's actual results. Company, brand, market and product identifiers have been removed.
+    </p>
+  </main>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const DATA = {"company": {"rev": [3.63, 3.79, 3.99, 4.0, 4.02, 3.95, 3.93, 3.88, 3.9, 3.88, 4.02, 4.16], "ebitda": [0.73, 0.72, 0.74, 0.8, 0.97, 0.9, 0.92, 0.94, 0.9, 0.77, 0.89, 1.0], "margin": [20.1, 19.0, 18.5, 20.0, 24.1, 22.8, 23.4, 24.2, 23.1, 19.8, 22.1, 24.0], "sA": [2.04, 2.16, 2.33, 2.25, 2.25, 2.22, 2.24, 2.14, 2.32, 2.18, 2.27, 2.44], "sB": [0.88, 1.0, 0.97, 1.08, 1.0, 1.02, 1.07, 1.0, 0.97, 1.07, 1.09, 1.06], "sC": [0.71, 0.63, 0.69, 0.67, 0.77, 0.71, 0.62, 0.74, 0.61, 0.63, 0.66, 0.66], "pA": [56.2, 57.0, 58.4, 56.2, 56.0, 56.2, 57.0, 55.2, 59.5, 56.2, 56.5, 58.7], "pB": [24.2, 26.4, 24.3, 27.0, 24.9, 25.8, 27.2, 25.8, 24.9, 27.6, 27.1, 25.5], "pC": [19.6, 16.6, 17.3, 16.8, 19.2, 18.0, 15.8, 19.1, 15.6, 16.2, 16.4, 15.9], "uptime": [99.32, 99.31, 99.82, 99.34, 99.44, 99.83, 99.77, 99.78, 99.71, 99.71, 99.31, 99.34], "savings": [28.2, 29.8, 33.5, 33.5, 36.7, 38.3, 41.9, 41.5, 41.8, 43.2, 44.1, 44.7]}, "finance": {"collection": [96.0, 91.3, 92.9, 92.8, 92.0, 90.8, 93.8, 91.9, 95.2, 94.2, 95.1, 92.5], "dso": [38.1, 39.9, 38.4, 40.1, 40.2, 35.6, 34.4, 35.6, 35.3, 34.7, 35.9, 35.7], "opex": [70.8, 72.7, 71.0, 71.3, 69.8, 68.7, 70.9, 69.2, 67.5, 68.1, 68.0, 66.0], "revEmp": [44.3, 46.1, 47.7, 47.4, 46.8, 47.2, 48.2, 49.5, 49.1, 49.7, 49.5, 50.8], "payroll": [1.42, 1.44, 1.47, 1.48, 1.48, 1.48, 1.47, 1.47, 1.47, 1.49, 1.48, 1.5]}, "sales": {"unitA": [2.72, 2.93, 2.95, 3.13, 3.15, 3.05, 3.09, 3.0, 3.05, 3.11, 3.17, 3.2], "unitB": [1.22, 1.31, 1.36, 1.4, 1.44, 1.38, 1.32, 1.33, 1.29, 1.32, 1.32, 1.32], "arpa": {"Region 1": [1164.0, 1156.0, 1166.0, 1150.0, 1132.0, 1127.0, 1116.0, 1136.0, 1143.0, 1156.0, 1140.0, 1145.0], "Region 2": [1022.0, 1029.0, 1018.0, 1015.0, 1026.0, 1017.0, 1011.0, 1037.0, 1026.0, 1038.0, 1037.0, 1065.0], "Region 3": [1339.0, 1321.0, 1342.0, 1341.0, 1321.0, 1311.0, 1296.0, 1290.0, 1318.0, 1317.0, 1329.0, 1332.0], "Region 4": [1094.0, 1097.0, 1086.0, 1111.0, 1106.0, 1129.0, 1119.0, 1155.0, 1160.0, 1183.0, 1173.0, 1190.0], "Region 5": [1247.0, 1260.0, 1290.0, 1300.0, 1328.0, 1332.0, 1349.0, 1362.0, 1347.0, 1380.0, 1363.0, 1360.0]}, "renewal": [70.4, 73.4, 73.6, 70.6, 71.8, 75.6, 76.0, 72.9, 74.4, 75.3, 76.5, 78.9], "cacA": [9.2, 8.8, 8.4, 8.9, 8.6, 8.3, 8.0, 7.9, 7.6, 7.3, 7.1, 6.5], "cacB": [11.3, 11.3, 11.2, 10.6, 10.5, 10.1, 10.0, 9.9, 9.4, 8.9, 8.8, 9.1], "ltvA": [2.62, 2.66, 3.02, 3.08, 3.17, 3.28, 3.23, 3.32, 3.56, 3.38, 3.63, 3.7], "ltvB": [2.05, 2.02, 2.16, 2.28, 2.43, 2.36, 2.39, 2.66, 2.74, 2.62, 2.68, 2.92]}, "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]};
+const MO = DATA.months;
+
+/* ---------- formatting ---------- */
+const FMT = {
+  m:   v => '$' + v.toFixed(2) + 'M',
+  k:   v => '$' + v.toFixed(1) + 'K',
+  pct: v => v.toFixed(1) + '%',
+  d:   v => v.toFixed(1) + ' d',
+  mo:  v => v.toFixed(1) + ' mo',
+  x:   v => v.toFixed(2) + 'x',
+  n0:  v => '$' + Math.round(v).toLocaleString('en-US')
+};
+function tickText(fmt, v, dec){
+  const n = v.toLocaleString('en-US',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+  switch(fmt){
+    case 'm':  return '$' + n + 'M';
+    case 'k':  return '$' + n + 'K';
+    case 'pct':return n + '%';
+    case 'x':  return n + 'x';
+    case 'n0': return '$' + n;
+    default:   return n;                 // d, mo
+  }
+}
+function delta(arr, pp){
+  const a = arr[arr.length-2], b = arr[arr.length-1];
+  const v = pp ? (b - a) : ((b - a) / Math.abs(a) * 100);
+  return {v, up: v >= 0, txt: (v>=0?'▲ ':'▼ ') + Math.abs(v).toFixed(1) + (pp ? ' p.p. MoM' : '% MoM')};
+}
+const roll6 = a => a.slice(-6).reduce((s,x)=>s+x,0)/6;
+
+function niceTicks(lo, hi, n){
+  const raw = (hi - lo) / (n - 1);
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,2.5,5,10].map(m=>m*mag).find(v=>v>=raw) || 10*mag;
+  const first = Math.ceil(lo/step)*step;
+  const out=[]; for(let v=first; v<=hi+1e-9; v+=step) out.push(+v.toFixed(10));
+  return out.length>=2 ? out : [lo,(lo+hi)/2,hi];
+}
+
+/* ---------- monotone cubic path ---------- */
+function path(pts){
+  const n = pts.length; if(n<2) return '';
+  const dx=[],dy=[],m=[];
+  for(let i=0;i<n-1;i++){dx.push(pts[i+1][0]-pts[i][0]); dy.push(pts[i+1][1]-pts[i][1]);}
+  const s = dx.map((d,i)=>dy[i]/d);
+  m[0]=s[0]; m[n-1]=s[n-2];
+  for(let i=1;i<n-1;i++) m[i] = (s[i-1]*s[i]<=0) ? 0 : (s[i-1]+s[i])/2;
+  for(let i=0;i<n-1;i++){
+    if(s[i]===0){m[i]=0;m[i+1]=0;continue}
+    const a=m[i]/s[i], b=m[i+1]/s[i], h=Math.hypot(a,b);
+    if(h>3){m[i]=3*a/h*s[i]; m[i+1]=3*b/h*s[i];}
+  }
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<n-1;i++){
+    const t=dx[i]/3;
+    d += ` C${pts[i][0]+t},${pts[i][1]+m[i]*t} ${pts[i+1][0]-t},${pts[i+1][1]-m[i+1]*t} ${pts[i+1][0]},${pts[i+1][1]}`;
+  }
+  return d;
+}
+
+/* ---------- chart ---------- */
+let uid = 0;
+function chart(series, fmt, opts){
+  opts = opts || {};
+  const H = opts.h || 190, PT = 10, PB = 8, N = MO.length;
+  const all = series.flatMap(s => s.data);
+  let lo = Math.min(...all), hi = Math.max(...all);
+  const pad = (hi - lo) * .22 || Math.abs(hi) * .08 || 1;
+  lo -= pad; hi += pad;
+  const X = i => i * 100 / (N - 1);                        // viewBox units, 0..100
+  const Y = v => PT + (1 - (v - lo) / (hi - lo)) * (H - PT - PB);
+  const id = 'g' + (uid++);
+  const ticks = niceTicks(lo, hi, 4);
+  const step = ticks.length > 1 ? Math.abs(ticks[1] - ticks[0]) : (hi - lo);
+  const dec = Math.max(0, Math.min(2, Math.ceil(-Math.log10(step || 1))));
+  let s = `<svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" role="img" aria-label="Trend chart" style="height:${H}px">
+    <defs>`;
+  series.forEach((se,k)=>{ s += `<linearGradient id="${id}_${k}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="${se.color}" stop-opacity=".40"/>
+      <stop offset="1" stop-color="${se.color}" stop-opacity="0"/></linearGradient>`; });
+  s += `</defs>`;
+  ticks.forEach(t => { s += `<line x1="0" x2="100" y1="${Y(t).toFixed(2)}" y2="${Y(t).toFixed(2)}"
+      stroke="var(--line)" stroke-width="1" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>`; });
+  series.forEach((se,k)=>{
+    const pts = se.data.map((v,i)=>[X(i), Y(v)]);
+    const p = path(pts);
+    if (series.length === 1)
+      s += `<path d="${p} L100,${H-PB} L0,${H-PB} Z" fill="url(#${id}_${k})"/>`;
+    s += `<path d="${p}" fill="none" stroke="${se.color}" stroke-width="2" vector-effect="non-scaling-stroke"
+        stroke-linecap="round" stroke-linejoin="round"/>`;
+  });
+  s += `<line class="cross" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#8a97a8" stroke-width="1"
+      stroke-dasharray="2 2" vector-effect="non-scaling-stroke" opacity="0"/></svg>`;
+  // HTML label layer — readable at any width
+  let lab = '';
+  ticks.forEach(t => { lab += `<div class="ylab" style="top:${Y(t).toFixed(1)}px">${tickText(fmt, t, dec)}</div>`; });
+  const every = N > 8 ? 2 : 1;
+  MO.forEach((m,i)=>{ if(i % every === 0 || i === N-1)
+    lab += `<div class="xlab" style="left:calc(46px + ${X(i).toFixed(2)}% - ${(X(i)*0.46).toFixed(2)}px)">${m}</div>`; });
+  series.forEach(se => { const v = se.data[N-1];
+    lab += `<div class="dot" style="left:calc(100% - 1px);top:${Y(v).toFixed(1)}px;background:${se.color}"></div>`; });
+  if (series.length > 1 && series.length <= 4){
+    const ends = series.map(se => ({se, y: Y(se.data[N-1]) - 15})).sort((a,b)=>a.y-b.y);
+    const GAP = 16;
+    for (let i=1;i<ends.length;i++) if (ends[i].y - ends[i-1].y < GAP) ends[i].y = ends[i-1].y + GAP;
+    const over = ends[ends.length-1].y - (H - 4);
+    if (over > 0) ends.forEach(e => e.y -= over);
+    ends.forEach(e => { lab += `<div class="elab" style="right:4px;top:${Math.max(4,e.y).toFixed(1)}px"><i style="background:${e.se.color}"></i>${e.se.name}</div>`; });
+  }
+  series.forEach(se => { lab += `<div class="hdot" data-hd style="background:${se.color}"></div>`; });
+  const geo = JSON.stringify({H,PT,PB,lo,hi,N});
+  const meta = JSON.stringify({series:series.map(s=>({name:s.name,color:s.color,data:s.data})),fmt,H,PT,PB,lo,hi});
+  return `<div class="chart" data-chart='${meta.replace(/'/g,"&#39;")}'>${s}${lab}</div>`;
+}
+
+/* ---------- building blocks ---------- */
+function kpi(label, arr, fmt, o){
+  o = o || {};
+  const d = delta(arr, !!o.pp);
+  const good = o.invert ? !d.up : d.up;
+  return `<div class="klab">${label}</div>
+    <div class="kval">${FMT[fmt](arr[arr.length-1])}</div>
+    <div class="krow"><span class="kdelta ${good?'up':'down'}">${d.txt}</span>
+    ${o.roll ? `<span class="kroll">Rolling 6M avg ${FMT[fmt](roll6(arr))}</span>` : ''}</div>`;
+}
+function legend(series){
+  return `<div class="legend">${series.map(s=>`<span><i class="sw" style="background:${s.color}"></i>${s.name}</span>`).join('')}</div>`;
+}
+function metricCard(label, arr, fmt, color, o){
+  return `<div class="card">${kpi(label, arr, fmt, o)}${chart([{name:label,color,data:arr}], fmt, {h:150})}</div>`;
+}
+function wideCard(title, series, fmt, h){
+  return `<div class="card"><div class="klab" style="min-height:0;margin-bottom:10px">${title}</div>
+    ${series.length>1 ? legend(series) : ''}${chart(series, fmt, {h:h||210})}</div>`;
+}
+
+/* ---------- pages ---------- */
+const C = DATA.company, F = DATA.finance, S = DATA.sales;
+const PAL = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+const CB = 'var(--c-blue)', CT = 'var(--c-teal)', CG = 'var(--c-green)', CP = 'var(--c-purple)';
+
+const PAGES = [
+{ id:'company', name:'Company metrics', title:'COMPANY METRICS', html: () => `
+  <section class="sec"><h2>Revenue &amp; profitability</h2>
+    <div class="grid g3">
+      ${metricCard('Total Revenue', C.rev, 'm', CB)}
+      ${metricCard('EBITDA', C.ebitda, 'm', CT)}
+      ${metricCard('EBITDA Margin %', C.margin, 'pct', CG, {pp:true})}
+    </div></section>
+  <section class="sec"><h2>Net revenue by stream</h2>
+    <div class="grid g3">
+      ${metricCard('Net Revenue — Stream A', C.sA, 'm', CB)}
+      ${metricCard('Net Revenue — Stream B', C.sB, 'm', CT)}
+      ${metricCard('Net Revenue — Stream C', C.sC, 'm', CG)}
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Net revenue by stream — 12-month trend', [
+      {name:'Stream A',color:PAL[0],data:C.sA},
+      {name:'Stream B',color:PAL[1],data:C.sB},
+      {name:'Stream C',color:PAL[2],data:C.sC}], 'm')}
+  </section>
+  <section class="sec"><h2>Revenue mix</h2>
+    <div class="grid g3">
+      <div class="card">${kpi('Stream A % of Revenue', C.pA, 'pct', {pp:true, roll:true})}</div>
+      <div class="card">${kpi('Stream B % of Revenue', C.pB, 'pct', {pp:true, roll:true})}</div>
+      <div class="card">${kpi('Stream C % of Revenue', C.pC, 'pct', {pp:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Revenue mix — share of total revenue', [
+      {name:'Stream A',color:PAL[0],data:C.pA},
+      {name:'Stream B',color:PAL[1],data:C.pB},
+      {name:'Stream C',color:PAL[2],data:C.pC}], 'pct')}
+  </section>
+  <section class="sec"><h2>Platform &amp; automation</h2>
+    <div class="grid g2">
+      ${metricCard('System Uptime %', C.uptime, 'pct', CP, {pp:true})}
+      ${metricCard('Automation Cost Savings', C.savings, 'k', CG)}
+    </div></section>` },
+
+{ id:'finance', name:'Finance', title:'FINANCE', html: () => `
+  <section class="sec"><h2>Working capital</h2>
+    <div class="grid g2">
+      ${metricCard('Collection Rate %', F.collection, 'pct', CG, {pp:true, roll:true})}
+      ${metricCard('Days Sales Outstanding (DSO)', F.dso, 'd', CP, {invert:true, roll:true})}
+    </div></section>
+  <section class="sec"><h2>Cost efficiency</h2>
+    <div class="grid g3">
+      <div class="card">${kpi('OpEx as % of Revenue', F.opex, 'pct', {pp:true, invert:true, roll:true})}</div>
+      <div class="card">${kpi('Revenue per Employee', F.revEmp, 'k', {roll:true})}</div>
+      <div class="card">${kpi('Total Payroll Cost', F.payroll, 'm', {invert:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g3">
+      ${wideCard('OpEx as % of Revenue', [{name:'OpEx % of revenue',color:PAL[0],data:F.opex}], 'pct', 190)}
+      ${wideCard('Revenue per Employee', [{name:'Revenue per employee',color:PAL[2],data:F.revEmp}], 'k', 190)}
+      ${wideCard('Total Payroll Cost', [{name:'Total payroll cost',color:PAL[1],data:F.payroll}], 'm', 190)}
+    </div>
+  </section>` },
+
+{ id:'sales', name:'Sales & Marketing', title:'SALES &amp; MARKETING', html: () => `
+  <section class="sec"><h2>Gross bookings revenue by business unit</h2>
+    <div class="grid g2">
+      ${metricCard('Unit A — Gross Bookings Revenue', S.unitA, 'm', CB)}
+      ${metricCard('Unit B — Gross Bookings Revenue', S.unitB, 'm', CT)}
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Gross bookings revenue — Unit A vs Unit B', [
+      {name:'Unit A',color:PAL[0],data:S.unitA},
+      {name:'Unit B',color:PAL[1],data:S.unitB}], 'm')}
+  </section>
+  <section class="sec"><h2>Pricing &amp; retention</h2>
+    <div class="grid g2">
+      ${wideCard('Average Revenue per Account by region', Object.keys(S.arpa).map((k,i)=>({name:k,color:PAL[i],data:S.arpa[k]})), 'n0')}
+      <div class="card">${kpi('Renewal Rate %', S.renewal, 'pct', {pp:true, roll:true})}
+        ${chart([{name:'Renewal rate',color:CG,data:S.renewal}],'pct',{h:150})}</div>
+    </div></section>
+  <section class="sec"><h2>Unit economics</h2>
+    <div class="grid g4">
+      <div class="card">${kpi('Unit A — CAC Payback Period', S.cacA, 'mo', {invert:true, roll:true})}</div>
+      <div class="card">${kpi('Unit B — CAC Payback Period', S.cacB, 'mo', {invert:true, roll:true})}</div>
+      <div class="card">${kpi('Unit A — LTV:CAC Ratio', S.ltvA, 'x', {roll:true})}</div>
+      <div class="card">${kpi('Unit B — LTV:CAC Ratio', S.ltvB, 'x', {roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g2">
+      ${wideCard('CAC payback period, months', [
+        {name:'Unit A',color:PAL[0],data:S.cacA},{name:'Unit B',color:PAL[1],data:S.cacB}], 'mo', 190)}
+      ${wideCard('LTV:CAC ratio', [
+        {name:'Unit A',color:PAL[0],data:S.ltvA},{name:'Unit B',color:PAL[1],data:S.ltvB}], 'x', 190)}
+    </div>
+  </section>` }
+];
+
+/* ---------- render ---------- */
+const nav = document.getElementById('nav');
+PAGES.forEach((p,i)=>{
+  const b = document.createElement('button');
+  b.textContent = p.name; b.setAttribute('aria-current', i===0);
+  b.onclick = () => show(i); nav.appendChild(b);
+});
+let tablesOn = false;
+function show(i){
+  [...nav.children].forEach((b,k)=>b.setAttribute('aria-current', k===i));
+  document.getElementById('ptitle').innerHTML = PAGES[i].title;
+  document.getElementById('page').innerHTML = PAGES[i].html();
+  buildTables(); wire();
+  window.scrollTo({top:0});
+}
+function buildTables(){
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    const m = JSON.parse(el.getAttribute('data-chart'));
+    const t = document.createElement('table');
+    t.className = 'dt' + (tablesOn ? '' : ' hidden');
+    t.innerHTML = '<thead><tr><th>Series</th>' + MO.map(x=>`<th>${x}</th>`).join('') + '</tr></thead><tbody>' +
+      m.series.map(s=>`<tr><td>${s.name}</td>` + s.data.map(v=>`<td>${FMT[m.fmt](v)}</td>`).join('') + '</tr>').join('') +
+      '</tbody>';
+    el.parentNode.insertBefore(t, el.nextSibling);
+  });
+}
+document.getElementById('tt').onclick = e => {
+  tablesOn = !tablesOn;
+  e.target.setAttribute('aria-pressed', tablesOn);
+  document.querySelectorAll('table.dt').forEach(t=>t.classList.toggle('hidden', !tablesOn));
+};
+/* ---------- hover ---------- */
+const tip = document.getElementById('tip');
+function wire(){
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    const m = JSON.parse(el.getAttribute('data-chart'));
+    const svg = el.querySelector('svg');
+    const cross = svg.querySelector('.cross');
+    el.addEventListener('pointermove', ev=>{
+      const svgRect = svg.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (ev.clientX - svgRect.left) / svgRect.width));
+      const idx = Math.max(0, Math.min(MO.length-1, Math.round(f * (MO.length - 1))));
+      cross.setAttribute('opacity','.8');
+      const xu = idx * 100 / (MO.length - 1);
+      const hds = el.querySelectorAll('[data-hd]');
+      const Yp = v => m.PT + (1 - (v - m.lo) / (m.hi - m.lo)) * (m.H - m.PT - m.PB);
+      hds.forEach((hd,si)=>{ hd.style.opacity = 1;
+        hd.style.left = `calc(46px + ${xu}% - ${(xu*0.46).toFixed(2)}px)`;
+        hd.style.top  = Yp(m.series[si].data[idx]).toFixed(1) + 'px'; });
+      cross.setAttribute('x1', xu); cross.setAttribute('x2', xu);
+      tip.innerHTML = `<b>${MO[idx]}</b>` + m.series.map(s=>
+        `<div class="r"><i class="sw" style="background:${s.color}"></i>${s.name}: <strong>${FMT[m.fmt](s.data[idx])}</strong></div>`).join('');
+      tip.style.opacity = 1;
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.min(window.innerWidth - tw - 12, svgRect.left + xu/100*svgRect.width + 14) + 'px';
+      tip.style.top  = Math.max(8, ev.clientY - 16) + 'px';
+    });
+    el.addEventListener('pointerleave', ()=>{ tip.style.opacity = 0; cross.setAttribute('opacity','0');
+      el.querySelectorAll('[data-hd]').forEach(h=>h.style.opacity = 0); });
+  });
+}
+show(0);
+</script>
+</body>
+</html>

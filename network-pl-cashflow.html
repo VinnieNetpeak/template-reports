@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restaurant Network — P&amp;L and Cash Flow Dashboard (Sample)</title>
+<style>
+:root{
+  --surface:#0b1416; --panel:#111b1d; --panel-2:#15211f; --line:#1e2c2e; --axis:#33454a;
+  --ink:#ffffff; --ink-2:#9fb0ae; --ink-3:#7d8f8d;
+  --good:#35c48d; --bad:#f0705e;
+  --s1:#d95926; --s2:#199e70; --s3:#9085e9; --s4:#c98500; --s5:#d55181;
+  --c-blue:#c98500; --c-teal:#199e70; --c-green:#9085e9; --c-purple:#d55181;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--surface);color:var(--ink);
+  font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:196px 1fr;min-height:100vh}
+/* ---------- sidebar ---------- */
+.side{background:#081011;border-right:1px solid var(--line);padding:14px 0 24px}
+.brandmark{padding:0 16px 16px;font-size:11px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase}
+.side nav{display:flex;flex-direction:column}
+.side button{background:none;border:0;color:var(--ink-2);text-align:left;padding:10px 16px;
+  font:inherit;font-size:12.5px;cursor:pointer;border-left:3px solid transparent;line-height:1.35}
+.side button:hover{color:var(--ink);background:#0d1718}
+.side button[aria-current="true"]{color:var(--ink);border-left-color:var(--s1);background:#0f1b1c;font-weight:bold}
+.side .muted{color:#46595a;cursor:not-allowed}
+.side .muted:hover{background:none;color:#46595a}
+.side .grp{padding:16px 16px 6px;font-size:10px;letter-spacing:.12em;color:#46595a;text-transform:uppercase}
+/* ---------- topbar ---------- */
+.main{min-width:0;padding:0 28px 56px}
+.top{display:flex;align-items:center;gap:16px;padding:16px 0 10px;position:sticky;top:0;background:var(--surface);z-index:5}
+.seg{display:flex;gap:6px}
+.seg button{background:#172224;border:1px solid #253434;color:var(--ink-2);font:inherit;font-size:10.5px;
+  letter-spacing:.1em;padding:6px 14px;border-radius:3px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#274440;color:#fff;border-color:#35564f}
+.top h1{flex:1;text-align:center;margin:0;font-size:17px;letter-spacing:.22em;font-weight:bold}
+.ctl{display:flex;align-items:center;gap:8px}
+.ctl label{font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+select,.tbtn{background:#172224;border:1px solid #253434;color:var(--ink);font:inherit;font-size:12px;
+  padding:6px 10px;border-radius:3px;cursor:pointer}
+.rule{height:1px;background:linear-gradient(90deg,#253434,rgba(37,52,52,0));margin:2px 0 18px}
+/* ---------- sections ---------- */
+.sec{margin:0 0 34px}
+.sec > h2{margin:0 0 14px;font-size:11px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;font-weight:bold}
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid #1a2729;border-radius:8px;padding:16px 16px 10px;min-width:0}
+.klab{font-size:12.5px;color:var(--ink-2);margin:0 0 8px;line-height:1.3;min-height:2.6em}
+.kval{font-size:30px;font-weight:bold;letter-spacing:-.01em;line-height:1.05}
+.krow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:7px}
+.kdelta{font-size:12.5px;font-weight:bold}
+.kdelta.up{color:var(--good)} .kdelta.down{color:var(--bad)}
+.kroll{font-size:11px;color:var(--ink-3)}
+.chart{margin-top:12px;position:relative;padding-left:46px;padding-bottom:20px}
+.ylab,.xlab,.elab{position:absolute;font-size:10px;color:var(--ink-3);white-space:nowrap;pointer-events:none}
+.ylab{left:0;width:40px;text-align:right;transform:translateY(-50%)}
+.xlab{bottom:2px;transform:translateX(-50%)}
+.elab{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-2);transform:translateY(-50%);background:var(--panel);padding:1px 4px;border-radius:3px}
+.elab i{width:7px;height:7px;border-radius:2px;flex:0 0 auto}
+.dot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 0 2px var(--panel);pointer-events:none}
+.hdot{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 0 2.5px var(--panel);pointer-events:none;opacity:0;transition:opacity .08s}
+svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 8px;font-size:11.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tip{position:fixed;pointer-events:none;background:#081011;border:1px solid #253434;border-radius:5px;
+  padding:8px 10px;font-size:11.5px;color:var(--ink);z-index:50;opacity:0;transition:opacity .08s;box-shadow:0 6px 22px rgba(0,0,0,.55);white-space:nowrap}
+.tip b{display:block;color:var(--ink-3);font-weight:normal;font-size:10.5px;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
+.tip .r{display:flex;align-items:center;gap:7px;line-height:1.5}
+table.dt{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;color:var(--ink-2)}
+table.dt th,table.dt td{border-bottom:1px solid #1a2729;padding:4px 6px;text-align:right;white-space:nowrap}
+table.dt th:first-child,table.dt td:first-child{text-align:left;color:var(--ink)}
+table.dt thead th{color:var(--ink-3);font-weight:normal}
+.hidden{display:none}
+.bars{display:grid;gap:9px;margin-top:6px}
+.brow{display:grid;grid-template-columns:130px 1fr 78px;align-items:center;gap:12px}
+.bname{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btrack{position:relative;height:16px;background:#0e1a1b;border-radius:4px;overflow:visible}
+.bfill{height:100%;border-radius:4px}
+.bval{font-size:12.5px;font-weight:bold;text-align:right;white-space:nowrap}
+.btgt{position:absolute;top:-4px;bottom:-4px;width:0;border-left:1px dashed #8aa09d}
+.btgtlab{font-size:10px;color:var(--ink-3);margin-top:4px}
+.note{margin:34px 0 0;padding:14px 16px;border:1px dashed #253434;border-radius:8px;color:var(--ink-3);font-size:11.5px;line-height:1.6}
+.note b{color:var(--ink-2)}
+@media (max-width:1100px){.app{grid-template-columns:1fr}.side{display:none}.g3,.g4{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-palette="#d95926,#199e70,#9085e9,#c98500,#d55181">
+<div class="app">
+  <aside class="side">
+    <div class="brandmark">Network P&amp;L</div>
+    <div class="grp">Network</div>
+    <nav id="nav"></nav>
+    <div class="grp">By unit</div>
+    <nav>
+      <button class="muted" disabled>Location 1</button>
+      <button class="muted" disabled>Location 2</button>
+      <button class="muted" disabled>Location 3</button>
+      <button class="muted" disabled>Location 4</button>
+      <button class="muted" disabled>Location 5</button>
+      <button class="muted" disabled>Express point</button>
+      <button class="muted" disabled>Food-court unit</button>
+      <button class="muted" disabled>Delivery</button>
+      <button class="muted" disabled>Central kitchen</button>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div class="seg">
+        <button aria-pressed="true">NETWORK</button>
+        <button aria-pressed="false" disabled title="Not included in this sample">SINGLE UNIT</button>
+      </div>
+      <h1 id="ptitle">P&amp;L &amp; PROFITABILITY</h1>
+      <div class="ctl">
+        <label for="period">Period</label>
+        <select id="period"><option>Last 12 months</option><option>Last 6 months</option><option>Year to date</option></select>
+        <button class="tbtn" id="tt" aria-pressed="false">Data tables</button>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <div id="page"></div>
+    <p class="note">
+      <b>Sample report.</b> Metric structure reproduces a management reporting specification built by Netpeak Digital Data
+      for a multi-location food-service network — P&amp;L, prime cost, cash flow, investment return and liquidity ratios.
+      The source specification contains no figures at all; every value shown here is synthetic and generated for
+      demonstration. Brand, cuisine, city, POS and delivery-platform identifiers have been removed.
+    </p>
+  </main>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const DATA = {"months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "pl": {"rev": [13.38, 14.02, 13.95, 13.86, 13.66, 13.44, 13.37, 13.7, 13.66, 14.01, 14.64, 15.09], "dine": [8.46, 8.46, 8.76, 8.92, 8.46, 8.08, 8.57, 8.37, 8.48, 8.46, 9.44, 9.41], "deli": [4.92, 5.56, 5.19, 4.94, 5.2, 5.36, 4.8, 5.33, 5.18, 5.55, 5.2, 5.68], "barsh": [19.6, 20.1, 20.4, 20.4, 19.4, 19.0, 20.8, 19.1, 18.8, 18.9, 17.7, 19.3], "fc": [32.7, 33.5, 33.3, 32.5, 33.3, 32.0, 32.5, 31.4, 30.6, 30.5, 30.1, 31.7], "lc": [29.0, 29.0, 28.3, 29.6, 28.9, 29.1, 28.8, 28.4, 28.6, 27.4, 28.4, 27.8], "pc": [61.7, 62.5, 61.6, 62.1, 62.2, 61.1, 61.3, 59.8, 59.2, 57.9, 58.5, 59.5], "eb": [1.67, 1.74, 1.81, 2.04, 1.91, 2.12, 2.01, 2.27, 2.2, 2.34, 2.66, 2.7], "ebPct": [12.5, 12.4, 13.0, 14.7, 14.0, 15.8, 15.0, 16.6, 16.1, 16.7, 18.2, 17.9], "ctrl": [2.88, 2.95, 2.91, 3.28, 2.98, 3.3, 3.19, 3.39, 3.4, 3.48, 3.83, 3.95], "netP": [1.11, 1.22, 1.04, 1.17, 1.31, 1.19, 1.33, 1.38, 1.26, 1.34, 1.61, 1.56], "netPct": [8.3, 8.7, 7.5, 8.4, 9.6, 8.9, 9.9, 10.1, 9.2, 9.6, 11.0, 10.3], "be": [11.03, 12.14, 11.02, 11.57, 11.75, 11.27, 10.92, 11.25, 11.08, 12.08, 12.61, 12.16]}, "cf": {"ocf": [1.81, 1.42, 1.49, 1.56, 1.79, 1.91, 2.04, 1.85, 2.01, 1.99, 2.96, 2.64], "fcf": [1.15, 0.76, 0.95, 1.02, 1.37, 1.52, 1.71, 1.54, 1.76, 1.7, 2.62, 2.23], "capex": [0.66, 0.66, 0.54, 0.54, 0.42, 0.39, 0.33, 0.31, 0.25, 0.29, 0.34, 0.41], "wc": [3.14, 3.1, 3.04, 3.03, 3.0, 2.91, 2.81, 2.75, 2.71, 2.65, 2.69, 2.7], "eb": [1.67, 1.74, 1.81, 2.04, 1.91, 2.12, 2.01, 2.27, 2.2, 2.34, 2.66, 2.7], "inv": [9.48, 10.02, 10.56, 10.99, 11.67, 12.09, 12.81, 13.34, 13.91, 14.36, 14.95, 15.4], "ret": [2.15, 2.7, 3.32, 4.06, 4.64, 5.15, 5.78, 6.5, 7.09, 7.69, 8.27, 8.88], "roi": [22.7, 26.9, 31.4, 36.9, 39.8, 42.6, 45.1, 48.7, 51.0, 53.6, 55.3, 57.7], "payb": [21.7, 20.7, 20.5, 19.4, 18.2, 17.4, 17.0, 16.0, 14.8, 14.2, 13.6, 12.4], "dEb": [2.35, 2.41, 2.58, 2.72, 2.51, 2.7, 2.54, 2.41, 2.59, 2.49, 2.41, 2.66], "icr": [4.19, 3.71, 4.09, 3.74, 3.92, 4.24, 3.7, 3.75, 3.57, 3.27, 3.75, 3.23], "cr": [1.67, 1.65, 1.61, 1.75, 1.73, 1.88, 1.97, 2.07, 2.03, 2.11, 2.12, 2.11], "dEq": [1.39, 1.49, 1.43, 1.48, 1.46, 1.4, 1.38, 1.53, 1.4, 1.29, 1.36, 1.26]}, "un": {"units": [{"name": "Location 1", "rev": 2.71, "eb": 15.8}, {"name": "Location 2", "rev": 2.32, "eb": 13.1}, {"name": "Location 3", "rev": 1.96, "eb": 11.4}, {"name": "Location 4", "rev": 1.74, "eb": 16.9}, {"name": "Location 5", "rev": 1.51, "eb": 9.2}, {"name": "Express point", "rev": 1.12, "eb": 18.4}, {"name": "Food-court unit", "rev": 0.84, "eb": 7.6}], "channels": [{"name": "Own app", "rev": 1.58, "comm": 0.0, "margin": 26.4}, {"name": "Aggregator A", "rev": 1.94, "comm": 21.5, "margin": 12.8}, {"name": "Aggregator B", "rev": 1.21, "comm": 24.0, "margin": 10.3}], "ownShare": [33.9, 34.2, 34.1, 35.6, 33.4, 34.0, 34.1, 34.0, 34.2, 34.3, 34.9, 36.0], "avgCheck": [498.0, 494.0, 494.0, 501.0, 509.0, 513.0, 520.0, 523.0, 528.0, 536.0, 544.0, 540.0], "checks": [25.8, 25.7, 26.4, 26.3, 26.4, 26.4, 26.7, 27.4, 27.1, 27.7, 27.7, 28.1], "repeat": [42.6, 40.5, 41.7, 40.9, 39.2, 41.9, 43.2, 40.5, 42.8, 44.2, 43.5, 44.5], "rating": [4.46, 4.41, 4.42, 4.37, 4.36, 4.34, 4.4, 4.34, 4.39, 4.38, 4.34, 4.37], "otif": [92.2, 93.6, 94.7, 93.2, 93.5, 94.9, 94.4, 93.8, 95.1, 94.3, 96.1, 95.0], "delMargin": [18.3, 16.9, 17.0, 17.8, 16.9, 16.4, 16.5, 16.5, 16.0, 17.9, 15.8, 17.2]}};
+const MO = DATA.months;
+
+/* ---------- formatting ---------- */
+const FMT = {
+  m:   v => '\u20b4' + v.toFixed(2) + 'M',
+  k:   v => '\u20b4' + v.toFixed(1) + 'K',
+  pct: v => v.toFixed(1) + '%',
+  d:   v => v.toFixed(1) + ' d',
+  mo:  v => v.toFixed(1) + ' mo',
+  x:   v => v.toFixed(2) + 'x',
+  n0:  v => '\u20b4' + Math.round(v).toLocaleString('en-US'),
+  n1:  v => v.toFixed(1) + 'K',
+  n2:  v => v.toFixed(2)
+};
+function tickText(fmt, v, dec){
+  const n = v.toLocaleString('en-US',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+  switch(fmt){
+    case 'm':  return '\u20b4' + n + 'M';
+    case 'k':  return '\u20b4' + n + 'K';
+    case 'pct':return n + '%';
+    case 'x':  return n + 'x';
+    case 'n0': return '\u20b4' + n;
+    case 'n1': return n + 'K';
+    case 'n2': return n;
+    default:   return n;                 // d, mo
+  }
+}
+function delta(arr, pp){
+  const a = arr[arr.length-2], b = arr[arr.length-1];
+  const v = pp ? (b - a) : ((b - a) / Math.abs(a) * 100);
+  return {v, up: v >= 0, txt: (v>=0?'▲ ':'▼ ') + Math.abs(v).toFixed(1) + (pp ? ' p.p. MoM' : '% MoM')};
+}
+const roll6 = a => a.slice(-6).reduce((s,x)=>s+x,0)/6;
+
+function niceTicks(lo, hi, n){
+  const raw = (hi - lo) / (n - 1);
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,2.5,5,10].map(m=>m*mag).find(v=>v>=raw) || 10*mag;
+  const first = Math.ceil(lo/step)*step;
+  const out=[]; for(let v=first; v<=hi+1e-9; v+=step) out.push(+v.toFixed(10));
+  return out.length>=2 ? out : [lo,(lo+hi)/2,hi];
+}
+
+/* ---------- monotone cubic path ---------- */
+function path(pts){
+  const n = pts.length; if(n<2) return '';
+  const dx=[],dy=[],m=[];
+  for(let i=0;i<n-1;i++){dx.push(pts[i+1][0]-pts[i][0]); dy.push(pts[i+1][1]-pts[i][1]);}
+  const s = dx.map((d,i)=>dy[i]/d);
+  m[0]=s[0]; m[n-1]=s[n-2];
+  for(let i=1;i<n-1;i++) m[i] = (s[i-1]*s[i]<=0) ? 0 : (s[i-1]+s[i])/2;
+  for(let i=0;i<n-1;i++){
+    if(s[i]===0){m[i]=0;m[i+1]=0;continue}
+    const a=m[i]/s[i], b=m[i+1]/s[i], h=Math.hypot(a,b);
+    if(h>3){m[i]=3*a/h*s[i]; m[i+1]=3*b/h*s[i];}
+  }
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<n-1;i++){
+    const t=dx[i]/3;
+    d += ` C${pts[i][0]+t},${pts[i][1]+m[i]*t} ${pts[i+1][0]-t},${pts[i+1][1]-m[i+1]*t} ${pts[i+1][0]},${pts[i+1][1]}`;
+  }
+  return d;
+}
+
+/* ---------- chart ---------- */
+let uid = 0;
+function chart(series, fmt, opts){
+  opts = opts || {};
+  const H = opts.h || 190, PT = 10, PB = 8, N = MO.length;
+  const all = series.flatMap(s => s.data);
+  let lo = Math.min(...all), hi = Math.max(...all);
+  const pad = (hi - lo) * .22 || Math.abs(hi) * .08 || 1;
+  lo -= pad; hi += pad;
+  const X = i => i * 100 / (N - 1);                        // viewBox units, 0..100
+  const Y = v => PT + (1 - (v - lo) / (hi - lo)) * (H - PT - PB);
+  const id = 'g' + (uid++);
+  const ticks = niceTicks(lo, hi, 4);
+  const step = ticks.length > 1 ? Math.abs(ticks[1] - ticks[0]) : (hi - lo);
+  const dec = Math.max(0, Math.min(2, Math.ceil(-Math.log10(step || 1))));
+  let s = `<svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" role="img" aria-label="Trend chart" style="height:${H}px">
+    <defs>`;
+  series.forEach((se,k)=>{ s += `<linearGradient id="${id}_${k}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="${se.color}" stop-opacity=".40"/>
+      <stop offset="1" stop-color="${se.color}" stop-opacity="0"/></linearGradient>`; });
+  s += `</defs>`;
+  ticks.forEach(t => { s += `<line x1="0" x2="100" y1="${Y(t).toFixed(2)}" y2="${Y(t).toFixed(2)}"
+      stroke="var(--line)" stroke-width="1" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>`; });
+  series.forEach((se,k)=>{
+    const pts = se.data.map((v,i)=>[X(i), Y(v)]);
+    const p = path(pts);
+    if (series.length === 1)
+      s += `<path d="${p} L100,${H-PB} L0,${H-PB} Z" fill="url(#${id}_${k})"/>`;
+    s += `<path d="${p}" fill="none" stroke="${se.color}" stroke-width="2" vector-effect="non-scaling-stroke"
+        stroke-linecap="round" stroke-linejoin="round"/>`;
+  });
+  s += `<line class="cross" x1="0" x2="0" y1="${PT}" y2="${H-PB}" stroke="#8aa09d" stroke-width="1"
+      stroke-dasharray="2 2" vector-effect="non-scaling-stroke" opacity="0"/></svg>`;
+  // HTML label layer — readable at any width
+  let lab = '';
+  ticks.forEach(t => { lab += `<div class="ylab" style="top:${Y(t).toFixed(1)}px">${tickText(fmt, t, dec)}</div>`; });
+  const every = N > 8 ? 2 : 1;
+  MO.forEach((m,i)=>{ if(i % every === 0 || i === N-1)
+    lab += `<div class="xlab" style="left:calc(46px + ${X(i).toFixed(2)}% - ${(X(i)*0.46).toFixed(2)}px)">${m}</div>`; });
+  series.forEach(se => { const v = se.data[N-1];
+    lab += `<div class="dot" style="left:calc(100% - 1px);top:${Y(v).toFixed(1)}px;background:${se.color}"></div>`; });
+  if (series.length > 1 && series.length <= 4){
+    const ends = series.map(se => ({se, y: Y(se.data[N-1]) - 15})).sort((a,b)=>a.y-b.y);
+    const GAP = 16;
+    for (let i=1;i<ends.length;i++) if (ends[i].y - ends[i-1].y < GAP) ends[i].y = ends[i-1].y + GAP;
+    const over = ends[ends.length-1].y - (H - 4);
+    if (over > 0) ends.forEach(e => e.y -= over);
+    ends.forEach(e => { lab += `<div class="elab" style="right:4px;top:${Math.max(4,e.y).toFixed(1)}px"><i style="background:${e.se.color}"></i>${e.se.name}</div>`; });
+  }
+  series.forEach(se => { lab += `<div class="hdot" data-hd style="background:${se.color}"></div>`; });
+  const geo = JSON.stringify({H,PT,PB,lo,hi,N});
+  const meta = JSON.stringify({series:series.map(s=>({name:s.name,color:s.color,data:s.data})),fmt,H,PT,PB,lo,hi});
+  return `<div class="chart" data-chart='${meta.replace(/'/g,"&#39;")}'>${s}${lab}</div>`;
+}
+
+/* ---------- building blocks ---------- */
+function kpi(label, arr, fmt, o){
+  o = o || {};
+  const d = delta(arr, !!o.pp);
+  const good = o.invert ? !d.up : d.up;
+  return `<div class="klab">${label}</div>
+    <div class="kval">${FMT[fmt](arr[arr.length-1])}</div>
+    <div class="krow"><span class="kdelta ${good?'up':'down'}">${d.txt}</span>
+    ${o.roll ? `<span class="kroll">Rolling 6M avg ${FMT[fmt](roll6(arr))}</span>` : ''}</div>`;
+}
+function legend(series){
+  return `<div class="legend">${series.map(s=>`<span><i class="sw" style="background:${s.color}"></i>${s.name}</span>`).join('')}</div>`;
+}
+function metricCard(label, arr, fmt, color, o){
+  return `<div class="card">${kpi(label, arr, fmt, o)}${chart([{name:label,color,data:arr}], fmt, {h:150})}</div>`;
+}
+function bars(title, items, fmt, o){
+  o = o || {};
+  const max = Math.max(...items.map(i=>i.value)) * 1.10;
+  const rows = items.map((it,i)=>`<div class="brow">
+      <div class="bname" title="${it.name}">${it.name}</div>
+      <div class="btrack"><div class="bfill" style="width:${(it.value/max*100).toFixed(1)}%;background:${it.color||o.color||PAL[0]}"></div>
+        ${o.target!=null?`<div class="btgt" style="left:${(o.target/max*100).toFixed(1)}%"></div>`:''}</div>
+      <div class="bval">${FMT[fmt](it.value)}</div></div>`).join('');
+  const tbl = `<table class="dt hidden"><thead><tr><th>Unit</th><th>Value</th></tr></thead><tbody>` +
+    items.map(it=>`<tr><td>${it.name}</td><td>${FMT[fmt](it.value)}</td></tr>`).join('') + `</tbody></table>`;
+  return `<div class="card"><div class="klab" style="min-height:0;margin-bottom:12px">${title}</div>
+    <div class="bars">${rows}</div>
+    ${o.target!=null?`<div class="btgtlab">┆ dashed line — network target ${FMT[fmt](o.target)}</div>`:''}
+    ${tbl}</div>`;
+}
+function wideCard(title, series, fmt, h){
+  return `<div class="card"><div class="klab" style="min-height:0;margin-bottom:10px">${title}</div>
+    ${series.length>1 ? legend(series) : ''}${chart(series, fmt, {h:h||210})}</div>`;
+}
+
+/* ---------- pages ---------- */
+const P = DATA.pl, CF = DATA.cf, U = DATA.un;
+const PAL = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+const CB='var(--c-blue)', CT='var(--c-teal)', CG='var(--c-green)', CP='var(--c-purple)';
+
+const PAGES = [
+{ id:'pl', name:'P&L & profitability', title:'P&amp;L &amp; PROFITABILITY', html: () => `
+  <section class="sec"><h2>Revenue</h2>
+    <div class="grid g3">
+      ${metricCard('Total Network Revenue', P.rev, 'm', CB)}
+      ${metricCard('Dine-in Revenue', P.dine, 'm', CT)}
+      ${metricCard('Delivery Revenue', P.deli, 'm', CG)}
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Revenue split — dine-in vs delivery', [
+      {name:'Dine-in',color:PAL[0],data:P.dine},
+      {name:'Delivery',color:PAL[1],data:P.deli}], 'm')}
+  </section>
+
+  <section class="sec"><h2>Prime cost</h2>
+    <div class="grid g3">
+      <div class="card">${kpi('Food Cost % <span style="color:var(--ink-3)">· target 28–35%</span>', P.fc, 'pct', {pp:true, invert:true, roll:true})}</div>
+      <div class="card">${kpi('Labor Cost % <span style="color:var(--ink-3)">· target 25–35%</span>', P.lc, 'pct', {pp:true, invert:true, roll:true})}</div>
+      <div class="card">${kpi('Prime Cost % <span style="color:var(--ink-3)">· target ≤ 65%</span>', P.pc, 'pct', {pp:true, invert:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Prime cost structure — food cost + labor cost as % of revenue', [
+      {name:'Food Cost %',color:PAL[0],data:P.fc},
+      {name:'Labor Cost %',color:PAL[1],data:P.lc},
+      {name:'Prime Cost %',color:PAL[2],data:P.pc}], 'pct')}
+  </section>
+
+  <section class="sec"><h2>Profitability</h2>
+    <div class="grid g4">
+      <div class="card">${kpi('Controllable Profit', P.ctrl, 'm', {roll:true})}</div>
+      <div class="card">${kpi('EBITDA', P.eb, 'm', {roll:true})}</div>
+      <div class="card">${kpi('EBITDA % <span style="color:var(--ink-3)">· target 10–20%</span>', P.ebPct, 'pct', {pp:true, roll:true})}</div>
+      <div class="card">${kpi('Net Profit', P.netP, 'm', {roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g2">
+      ${wideCard('EBITDA and net profit', [
+        {name:'EBITDA',color:PAL[0],data:P.eb},
+        {name:'Net profit',color:PAL[2],data:P.netP}], 'm', 190)}
+      ${wideCard('EBITDA % and net margin %', [
+        {name:'EBITDA %',color:PAL[0],data:P.ebPct},
+        {name:'Net margin %',color:PAL[2],data:P.netPct}], 'pct', 190)}
+    </div>
+  </section>
+
+  <section class="sec"><h2>Break-even</h2>
+    ${wideCard('Revenue vs break-even point', [
+      {name:'Revenue',color:PAL[0],data:P.rev},
+      {name:'Break-even',color:PAL[3],data:P.be}], 'm', 200)}
+  </section>` },
+
+{ id:'cf', name:'Cash flow & liquidity', title:'CASH FLOW &amp; LIQUIDITY', html: () => `
+  <section class="sec"><h2>Cash flow</h2>
+    <div class="grid g3">
+      ${metricCard('Operating Cash Flow', CF.ocf, 'm', CB)}
+      ${metricCard('Free Cash Flow', CF.fcf, 'm', CT)}
+      ${metricCard('Working Capital', CF.wc, 'm', CG)}
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Operating cash flow vs EBITDA — accounting profit is not cash', [
+      {name:'EBITDA',color:PAL[0],data:CF.eb},
+      {name:'Operating CF',color:PAL[1],data:CF.ocf},
+      {name:'CAPEX',color:PAL[3],data:CF.capex}], 'm')}
+  </section>
+
+  <section class="sec"><h2>Investment return</h2>
+    <div class="grid g4">
+      <div class="card">${kpi('Invested to Date', CF.inv, 'm', {})}</div>
+      <div class="card">${kpi('Returned to Date', CF.ret, 'm', {})}</div>
+      <div class="card">${kpi('ROI', CF.roi, 'pct', {pp:true, roll:true})}</div>
+      <div class="card">${kpi('Payback Period', CF.payb, 'mo', {invert:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    ${wideCard('Cumulative invested vs returned', [
+      {name:'Invested',color:PAL[3],data:CF.inv},
+      {name:'Returned',color:PAL[2],data:CF.ret}], 'm', 200)}
+  </section>
+
+  <section class="sec"><h2>Leverage &amp; liquidity ratios</h2>
+    <div class="grid g4">
+      <div class="card">${kpi('Debt / EBITDA <span style="color:var(--ink-3)">· safe &lt; 3x</span>', CF.dEb, 'x', {invert:true, roll:true})}</div>
+      <div class="card">${kpi('Interest Coverage <span style="color:var(--ink-3)">· target &gt; 3x</span>', CF.icr, 'x', {roll:true})}</div>
+      <div class="card">${kpi('Current Ratio <span style="color:var(--ink-3)">· target &gt; 1.5</span>', CF.cr, 'x', {roll:true})}</div>
+      <div class="card">${kpi('Debt / Equity <span style="color:var(--ink-3)">· target &lt; 2x</span>', CF.dEq, 'x', {invert:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g2">
+      ${wideCard('Leverage — debt to EBITDA and debt to equity', [
+        {name:'Debt / EBITDA',color:PAL[1],data:CF.dEb},
+        {name:'Debt / Equity',color:PAL[3],data:CF.dEq}], 'x', 190)}
+      ${wideCard('Liquidity — interest coverage and current ratio', [
+        {name:'Interest coverage',color:PAL[0],data:CF.icr},
+        {name:'Current ratio',color:PAL[2],data:CF.cr}], 'x', 190)}
+    </div>
+  </section>` },
+
+{ id:'un', name:'Units & channels', title:'UNITS &amp; CHANNELS', html: () => `
+  <section class="sec"><h2>Performance by unit — latest month</h2>
+    <div class="grid g2">
+      ${bars('Revenue by unit', U.units.map(u=>({name:u.name, value:u.rev})), 'm')}
+      ${bars('EBITDA % by unit', U.units.map(u=>({name:u.name, value:u.eb})), 'pct', {target:15})}
+    </div>
+  </section>
+
+  <section class="sec"><h2>Delivery channels — latest month</h2>
+    <div class="grid g3">
+      ${bars('Revenue by channel', U.channels.map((c,i)=>({name:c.name, value:c.rev, color:PAL[i]})), 'm')}
+      ${bars('Platform commission %', U.channels.map((c,i)=>({name:c.name, value:c.comm, color:PAL[i]})), 'pct')}
+      ${bars('Delivery margin % by channel', U.channels.map((c,i)=>({name:c.name, value:c.margin, color:PAL[i]})), 'pct')}
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g2">
+      ${wideCard('Own channel share of delivery revenue <span style="color:var(--ink-3)">· target &gt; 30%</span>',
+        [{name:'Own channel share',color:PAL[2],data:U.ownShare}], 'pct', 190)}
+      ${wideCard('Delivery margin %', [{name:'Delivery margin',color:PAL[0],data:U.delMargin}], 'pct', 190)}
+    </div>
+  </section>
+
+  <section class="sec"><h2>Guest &amp; operations</h2>
+    <div class="grid g4">
+      <div class="card">${kpi('Average Check', U.avgCheck, 'n0', {roll:true})}</div>
+      <div class="card">${kpi('Checks per Month, thousands', U.checks, 'n1', {roll:true})}</div>
+      <div class="card">${kpi('Repeat Order Rate %', U.repeat, 'pct', {pp:true, roll:true})}</div>
+      <div class="card">${kpi('On-time Delivery (OTIF) %', U.otif, 'pct', {pp:true, roll:true})}</div>
+    </div>
+    <div style="height:18px"></div>
+    <div class="grid g2">
+      ${wideCard('Average check', [{name:'Average check',color:PAL[0],data:U.avgCheck}], 'n0', 190)}
+      ${wideCard('Guest rating <span style="color:var(--ink-3)">· target &gt; 4.3</span>',
+        [{name:'Guest rating',color:PAL[4],data:U.rating}], 'n2', 190)}
+    </div>
+  </section>` }
+];
+
+/* ---------- render ---------- */
+const nav = document.getElementById('nav');
+PAGES.forEach((p,i)=>{
+  const b = document.createElement('button');
+  b.textContent = p.name; b.setAttribute('aria-current', i===0);
+  b.onclick = () => show(i); nav.appendChild(b);
+});
+let tablesOn = false;
+function show(i){
+  [...nav.children].forEach((b,k)=>b.setAttribute('aria-current', k===i));
+  document.getElementById('ptitle').innerHTML = PAGES[i].title;
+  document.getElementById('page').innerHTML = PAGES[i].html();
+  buildTables(); wire();
+  window.scrollTo({top:0});
+}
+function buildTables(){
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    const m = JSON.parse(el.getAttribute('data-chart'));
+    const t = document.createElement('table');
+    t.className = 'dt' + (tablesOn ? '' : ' hidden');
+    t.innerHTML = '<thead><tr><th>Series</th>' + MO.map(x=>`<th>${x}</th>`).join('') + '</tr></thead><tbody>' +
+      m.series.map(s=>`<tr><td>${s.name}</td>` + s.data.map(v=>`<td>${FMT[m.fmt](v)}</td>`).join('') + '</tr>').join('') +
+      '</tbody>';
+    el.parentNode.insertBefore(t, el.nextSibling);
+  });
+}
+document.getElementById('tt').onclick = e => {
+  tablesOn = !tablesOn;
+  e.target.setAttribute('aria-pressed', tablesOn);
+  document.querySelectorAll('table.dt').forEach(t=>t.classList.toggle('hidden', !tablesOn));
+};
+/* ---------- hover ---------- */
+const tip = document.getElementById('tip');
+function wire(){
+  document.querySelectorAll('[data-chart]').forEach(el=>{
+    const m = JSON.parse(el.getAttribute('data-chart'));
+    const svg = el.querySelector('svg');
+    const cross = svg.querySelector('.cross');
+    el.addEventListener('pointermove', ev=>{
+      const svgRect = svg.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (ev.clientX - svgRect.left) / svgRect.width));
+      const idx = Math.max(0, Math.min(MO.length-1, Math.round(f * (MO.length - 1))));
+      cross.setAttribute('opacity','.8');
+      const xu = idx * 100 / (MO.length - 1);
+      const hds = el.querySelectorAll('[data-hd]');
+      const Yp = v => m.PT + (1 - (v - m.lo) / (m.hi - m.lo)) * (m.H - m.PT - m.PB);
+      hds.forEach((hd,si)=>{ hd.style.opacity = 1;
+        hd.style.left = `calc(46px + ${xu}% - ${(xu*0.46).toFixed(2)}px)`;
+        hd.style.top  = Yp(m.series[si].data[idx]).toFixed(1) + 'px'; });
+      cross.setAttribute('x1', xu); cross.setAttribute('x2', xu);
+      tip.innerHTML = `<b>${MO[idx]}</b>` + m.series.map(s=>
+        `<div class="r"><i class="sw" style="background:${s.color}"></i>${s.name}: <strong>${FMT[m.fmt](s.data[idx])}</strong></div>`).join('');
+      tip.style.opacity = 1;
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.min(window.innerWidth - tw - 12, svgRect.left + xu/100*svgRect.width + 14) + 'px';
+      tip.style.top  = Math.max(8, ev.clientY - 16) + 'px';
+    });
+    el.addEventListener('pointerleave', ()=>{ tip.style.opacity = 0; cross.setAttribute('opacity','0');
+      el.querySelectorAll('[data-hd]').forEach(h=>h.style.opacity = 0); });
+  });
+}
+show(0);
+</script>
+</body>
+</html>
