@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Демо-звіт: вклад каналів у продажі за довгого циклу угоди. П'ять сторінок Power BI, синтетичні дані.">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Вклад каналів у продажі — демо-звіт</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@1,8..60,400;0,8..60,400&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --plane:#eef1f5; --card:#ffffff; --card-2:#f6f8fb; --chrome:#fbfcfd;
+  --ink:#141b23; --ink-2:#4f5e6d; --ink-3:#8492a1;
+  --rule:#dbe2ea; --rule-soft:#eaeff4;
+  --brand:#2f80c8; --brand-soft:#e7f1fa;
+  --accent:#e4551f;
+  /* три правила розподілу — категоріальні, перевірені валідатором */
+  --c1:#2f80c8; --c2:#e4551f; --c3:#7c6bb0;
+  /* послідовний рамп для умовного форматування матриць */
+  --r1:#eaf2fa; --r2:#cfe3f4; --r3:#a9cdea; --r4:#7fb4de; --r5:#5399cf; --r6:#2f80c8; --r7:#24659f;
+  --on-r-lo:#141b23; --on-r-hi:#ffffff;
+  --good:#137a3a; --warn:#9a6b00; --crit:#c0392b;
+  --good-bg:#e7f4ec; --warn-bg:#fbf2dc; --crit-bg:#fbecea;
+  --shadow:0 1px 1px rgba(20,27,35,.05),0 3px 10px rgba(20,27,35,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --plane:#0d1218; --card:#161d25; --card-2:#1b232c; --chrome:#121920;
+  --ink:#e8eef4; --ink-2:#9daab8; --ink-3:#76838f;
+  --rule:#28313b; --rule-soft:#212932;
+  --brand:#5bacea; --brand-soft:#16283a;
+  --accent:#ff6a41;
+  --c1:#4593d6; --c2:#e85e30; --c3:#8375ba;
+  --r1:#16222e; --r2:#1c3348; --r3:#244a6a; --r4:#2c6392; --r5:#357cb8; --r6:#4593d6; --r7:#6ba9e0;
+  --on-r-lo:#e8eef4; --on-r-hi:#ffffff;
+  --good:#3aa860; --warn:#d9a521; --crit:#e0685c;
+  --good-bg:#122419; --warn-bg:#2a2313; --crit-bg:#2b1815;
+  --shadow:0 1px 1px rgba(0,0,0,.4),0 3px 12px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --plane:#0d1218; --card:#161d25; --card-2:#1b232c; --chrome:#121920;
+  --ink:#e8eef4; --ink-2:#9daab8; --ink-3:#76838f;
+  --rule:#28313b; --rule-soft:#212932;
+  --brand:#5bacea; --brand-soft:#16283a;
+  --accent:#ff6a41;
+  --c1:#4593d6; --c2:#e85e30; --c3:#8375ba;
+  --r1:#16222e; --r2:#1c3348; --r3:#244a6a; --r4:#2c6392; --r5:#357cb8; --r6:#4593d6; --r7:#6ba9e0;
+  --on-r-lo:#e8eef4; --on-r-hi:#ffffff;
+  --good:#3aa860; --warn:#d9a521; --crit:#e0685c;
+  --good-bg:#122419; --warn-bg:#2a2313; --crit-bg:#2b1815;
+  --shadow:0 1px 1px rgba(0,0,0,.4),0 3px 12px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font-family:"Segoe UI","Open Sans",system-ui,Arial,sans-serif;font-size:13.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- верхня смуга ---------- */
+.top{background:var(--chrome);border-bottom:1px solid var(--rule);padding:8px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.top .demo{font-size:12px;color:var(--ink-2)}
+.top .demo b{color:var(--ink);font-weight:600}
+.spacer{flex:1 1 40px}
+.tgl{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);cursor:pointer;border:1px solid var(--rule);background:var(--card);border-radius:5px;padding:5px 10px}
+.tgl input{accent-color:var(--brand);margin:0}
+.tgl:hover{background:var(--card-2)}
+
+/* ---------- каркас ---------- */
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);align-items:start}
+.rail{background:var(--chrome);border-right:1px solid var(--rule);padding:18px 12px 32px;display:flex;flex-direction:column;gap:18px;position:sticky;top:41px;max-height:calc(100vh - 41px);overflow-y:auto}
+.rail .client{font-weight:700;font-size:14.5px;padding:0 8px;letter-spacing:-.01em}
+.rail .sub{font-size:11.5px;color:var(--ink-3);padding:0 8px;margin-top:2px}
+.grp+.grp{margin-top:14px}
+.grp-h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:0 8px;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}
+.grp-h span{letter-spacing:0;text-transform:none;font-weight:400;font-size:10.5px}
+.pages{display:flex;flex-direction:column;gap:1px}
+.pg{display:block;width:100%;text-align:left;border:0;background:transparent;cursor:pointer;padding:8px 10px;border-radius:5px;color:var(--ink-2);font:inherit;border-left:3px solid transparent}
+.pg .t{display:block;font-weight:600;color:var(--ink);font-size:13px}
+.pg .q{display:block;font-size:11.5px;color:var(--ink-3);margin-top:1px;line-height:1.35}
+.pg:hover{background:var(--card-2)}
+.pg[aria-selected="true"]{background:var(--brand-soft);border-left-color:var(--brand)}
+.pg:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.rail-foot{margin-top:auto;padding:10px 8px 0;border-top:1px solid var(--rule);font-size:11px;color:var(--ink-3);line-height:1.55}
+.canvas{padding:22px 26px 56px;min-width:0}
+
+/* ---------- шапка сторінки ---------- */
+.ph{margin-bottom:4px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ph h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.02em}
+.badge{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:3px 7px;border-radius:4px;background:var(--brand-soft);color:var(--brand);white-space:nowrap}
+.badge.two{background:var(--card-2);color:var(--ink-2);border:1px solid var(--rule)}
+.quote{font-family:"Source Serif 4",Georgia,serif;font-style:italic;font-size:14.5px;color:var(--ink-2);margin:8px 0 0;max-width:74ch;border-left:2px solid var(--accent);padding-left:12px}
+.quote cite{display:block;font-style:normal;font-family:"Segoe UI","Open Sans",sans-serif;font-size:11.5px;color:var(--ink-3);margin-top:4px}
+.answers{margin:12px 0 0;font-size:13px;color:var(--ink-2);max-width:80ch}
+.answers b{color:var(--ink);font-weight:600}
+.slicers{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0 16px}
+.sl{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:5px 9px;font-size:12px;color:var(--ink-2)}
+.sl b{color:var(--ink);font-weight:600}
+.sl::after{content:"⌄";color:var(--ink-3);font-size:12px;line-height:1;margin-top:-3px}
+.sl.fixed::after{content:none}
+
+/* ---------- сітка й картки ---------- */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.wide{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.mb{margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:16px;box-shadow:var(--shadow);min-width:0;position:relative}
+.card>h2{margin:0 0 3px;font-size:13.5px;font-weight:700;letter-spacing:-.005em}
+.card>.cap{margin:0 0 14px;font-size:11.5px;color:var(--ink-3);line-height:1.45}
+.note{margin-top:14px;padding-top:11px;border-top:1px solid var(--rule-soft);font-family:"Source Serif 4",Georgia,serif;font-size:13px;color:var(--ink-2);line-height:1.6}
+.note b{font-family:"Segoe UI","Open Sans",sans-serif;color:var(--ink);font-weight:600;font-size:12.5px}
+.pbi{display:none;position:absolute;top:-1px;right:-1px;background:var(--ink);color:var(--card);font-size:10px;font-weight:600;padding:3px 7px;border-radius:0 6px 0 6px;letter-spacing:.01em;max-width:70%;text-align:right;line-height:1.3}
+body.show-pbi .pbi{display:block}
+body.show-pbi .card{padding-top:22px}
+
+/* ---------- плитки ---------- */
+.tile{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:13px 14px;box-shadow:var(--shadow);position:relative}
+.tile .lab{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;font-weight:700;line-height:1.3}
+.tile .val{font-size:25px;font-weight:700;letter-spacing:-.025em;margin-top:6px;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile .val small{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:0}
+.tile .sub{font-size:11.5px;color:var(--ink-3);margin-top:5px;line-height:1.4}
+.tile .dec{font-size:11px;color:var(--ink-2);margin-top:7px;padding-top:6px;border-top:1px dotted var(--rule);line-height:1.4}
+.tile .dec i{font-style:normal;color:var(--ink-3)}
+.tile.hero .val{font-size:30px}
+.d-up{color:var(--good);font-weight:700}.d-dn{color:var(--crit);font-weight:700}
+
+/* ---------- смуги ---------- */
+.bars{display:flex;flex-direction:column;gap:11px}
+.brow{display:grid;grid-template-columns:158px minmax(0,1fr);gap:12px;align-items:center}
+.brow .name{font-size:12px;color:var(--ink-2);text-align:right;line-height:1.25}
+.stack{display:flex;flex-direction:column;gap:2px}
+.bar{height:13px;display:flex;align-items:center;gap:8px}
+.bar .fill{height:13px;border-radius:0 3px 3px 0;min-width:2px;box-shadow:0 0 0 2px var(--card)}
+.bar.sm,.bar.sm .fill{height:9px}
+.bar .v{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar .v b{color:var(--ink);font-weight:600}
+.legend{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--ink-2)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+
+/* ---------- воронка ---------- */
+.funnel{display:flex;flex-direction:column;gap:6px}
+.fst{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:14px;align-items:center}
+.fbar{height:40px;border-radius:3px;display:flex;align-items:center;padding-left:13px;color:#fff;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;min-width:76px;background:var(--r6)}
+.fst .fl{font-size:12px;color:var(--ink-2);line-height:1.3}
+.fst .fl b{display:block;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;font-size:13px}
+
+/* ---------- таблиці ---------- */
+.tw{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--rule-soft);white-space:nowrap}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--rule);vertical-align:bottom}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+td:last-child,th:last-child{padding-right:0}
+tbody tr:hover{background:var(--card-2)}
+tfoot td{font-weight:700;border-top:1px solid var(--rule);border-bottom:0;color:var(--ink)}
+td.wrap,th.wrap{white-space:normal;min-width:132px}
+code{font-family:"Cascadia Mono",Consolas,monospace;font-size:.92em;background:var(--card-2);border:1px solid var(--rule);border-radius:3px;padding:0 4px}
+.dim{color:var(--ink-3)}.pos{color:var(--good);font-weight:600}.neg{color:var(--crit);font-weight:600}
+.mx td.cf{border-radius:3px;font-weight:600;text-align:center;box-shadow:0 0 0 2px var(--card)}
+.mx td.hi{outline:2px solid var(--accent);outline-offset:-2px}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:3px;text-transform:uppercase;vertical-align:1px}
+.tag.g{background:var(--good-bg);color:var(--good)}
+.tag.w{background:var(--warn-bg);color:var(--warn)}
+.tag.c{background:var(--crit-bg);color:var(--crit)}
+.tag.n{background:var(--card-2);color:var(--ink-3);border:1px solid var(--rule)}
+.mark{font-size:10.5px;color:var(--ink-3);font-weight:400;letter-spacing:0;text-transform:none}
+
+/* ---------- telegram ---------- */
+.tg{background:var(--card-2);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.tg-h{display:flex;gap:9px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--rule);background:var(--card)}
+.tg-av{width:29px;height:29px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.tg-h .n{font-weight:700;font-size:12.5px}.tg-h .s{font-size:11px;color:var(--ink-3)}
+.tg-b{padding:12px;display:flex;flex-direction:column;gap:9px}
+.msg{background:var(--card);border:1px solid var(--rule);border-radius:9px 9px 9px 2px;padding:11px 12px;font-size:12.5px;line-height:1.55}
+.msg h4{margin:0 0 2px;font-size:12.5px;font-weight:700}
+.msg .when{font-size:10.5px;color:var(--ink-3);margin-bottom:8px}
+.mr{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.mr .k{color:var(--ink-2)}.mr .v{font-variant-numeric:tabular-nums;font-weight:600}
+.msg .flags{margin-top:8px;padding-top:7px;border-top:1px solid var(--rule-soft);font-size:12px;color:var(--ink-2);line-height:1.5}
+.tg-t{font-size:10px;color:var(--ink-3);text-align:right;margin-top:5px}
+
+/* ---------- список ---------- */
+.steps{display:flex;flex-direction:column;gap:12px}
+.steps .h{font-weight:700;font-size:12.5px;margin-bottom:2px}
+.steps .b{color:var(--ink-2);font-size:12.5px;line-height:1.5}
+.tl{display:flex;flex-direction:column}
+.tlr{display:grid;grid-template-columns:78px 16px minmax(0,1fr);align-items:stretch}
+.tlr .d{font-size:11.5px;color:var(--ink-3);text-align:right;padding:7px 11px 0 0;font-variant-numeric:tabular-nums}
+.tlr .g{position:relative;display:flex;justify-content:center}
+.tlr .g i{position:absolute;top:13px;bottom:0;width:1px;background:var(--rule)}
+.tlr .g s{width:8px;height:8px;border-radius:50%;margin-top:9px;position:relative;z-index:1;background:var(--c1);text-decoration:none}
+.tlr.key .g s{width:11px;height:11px;margin-top:8px;background:var(--c2)}
+.tlr .c{padding:4px 0 12px 12px}
+.tlr .c b{font-size:13px;display:block}
+.tlr .c span{font-size:12px;color:var(--ink-2);line-height:1.45}
+
+.tt{position:fixed;z-index:60;pointer-events:none;opacity:0;transition:opacity .1s;background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:8px 10px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-size:12px;line-height:1.5;max-width:280px;color:var(--ink)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:1180px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--rule)}
+  .g6{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g4,.g3,.g2,.wide{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .canvas{padding:18px 14px 40px}
+}
+@media (max-width:680px){
+  .g6,.g4,.g3,.g2,.wide{grid-template-columns:1fr}
+  .brow{grid-template-columns:1fr;gap:3px}.brow .name{text-align:left}
+  .fst{grid-template-columns:1fr;gap:3px}
+}
+</style>
+<style>img{max-width:100%}</style>
+</head>
+<body>
+<div class="top">
+  <span class="demo"><b>Демонстраційний макет.</b> Цифри на сторінках синтетичні.</span>
+  <span class="spacer"></span>
+  <label class="tgl"><input type="checkbox" id="pbi-toggle"> Показати типи візуалів Power BI</label>
+</div>
+
+<div class="shell">
+  <nav class="rail" aria-label="Сторінки звіту">
+    <div>
+      <div class="client">Охоронна компанія</div>
+      <div class="sub">Вклад каналів у продажі · Power BI</div>
+    </div>
+    <div>
+      <div class="grp">
+        <div class="grp-h">Навігація</div>
+        <div class="pages" role="tablist" data-grp="0"></div>
+      </div>
+      <div class="grp">
+        <div class="grp-h">З’являються першими <span>релізи 1–3</span></div>
+        <div class="pages" role="tablist" data-grp="1"></div>
+      </div>
+      <div class="grp">
+        <div class="grp-h">Далі <span>релізи 4–7</span></div>
+        <div class="pages" role="tablist" data-grp="2"></div>
+      </div>
+    </div>
+    <div class="rail-foot">
+      <b style="color:var(--ink-2)">Релізи 1–3:</b> вивантаження CRM, публічний код сайтів, кабінети витрат.<br>
+      <b style="color:var(--ink-2)">Релізи 4–7:</b> + GA4, Google Ads, колтрекінг, ланцюжки дотиків, маржа напрямків.<br><br>
+      Оновлення щодня о 06:00<br>Netpeak · Digital Data
+    </div>
+  </nav>
+
+  <main class="canvas">
+
+  <!-- ============ 0 КАРТА ============ -->
+  <section id="p0" role="tabpanel">
+    <div class="ph"><h1>Карта: питання → метрика → сторінка</h1></div>
+    <p class="answers">Сторінка з'являється у звіті тільки якщо на ній ухвалюють рішення. План-факт живе всередині екрана керівника, окупність — усередині сторінки каналів. Нижче — питання, які стоять перед бізнесом, і те, що конкретно на них відповідає.</p>
+    <div class="card mb" data-pbi="У Power BI це не сторінка звіту, а слайд КП">
+      <span class="pbi"></span>
+      <h2>Вісім питань і реліз, який кожне закриває</h2>
+      <p class="cap">Питання, з якими приходить бізнес, перекладені мовою метрик.</p>
+      <div class="tw"><table id="t-map"></table></div>
+    </div>
+    <div class="grid wide">
+      <div class="card" data-pbi="Текстове поле">
+        <span class="pbi"></span>
+        <h2>Чого в цих звітах немає</h2>
+        <p class="cap">Межі обсягу, зафіксовані до старту.</p>
+        <div class="steps" id="s-none"></div>
+      </div>
+      <div class="card" data-pbi="Текстове поле">
+        <span class="pbi"></span>
+        <h2>Що від чого залежить</h2>
+        <p class="cap">Три релізи можна робити в будь-якому порядку, чотири — тільки послідовно.</p>
+        <div class="steps">
+          <div><div class="h">Порядок вільний: релізи 1, 2 і 7</div><div class="b">Аудит трекінгу, дайджест на даних CRM і повторні продажі не залежать один від одного. Дайджест можна запустити першим — він рахується з вивантаження CRM і не потребує ані виправленого трекінгу, ані розрахунку каналів.</div></div>
+          <div><div class="h">Порядок жорсткий: релізи 3 → 4 → 5 → 6</div><div class="b">Дослідження потребує даних у сховищі, розрахунок каналів — ідентифікації звернень, окупність — розрахунку каналів, екран керівника — і ймовірностей, і прибутку. Переставити їх місцями означає рахувати на тому, чого ще немає.</div></div>
+          <div><div class="h">Чому аудит усе одно перший</div><div class="b">Він нічого не блокує технічно, але дає частку звернень, які взагалі можна атрибутувати. Без цієї цифри розрахунок каналів у релізі 4 буде виглядати впевненіше, ніж він є.</div></div>
+        </div>
+        <div class="note"><b>Наша мета</b> — щоб після кожного релізу лишався робочий результат, а рішення про наступний ухвалювалось на ньому, а не на обіцянці.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 1 ТРЕКІНГ ============ -->
+  <section id="p1" role="tabpanel" hidden>
+    <div class="ph"><h1>Здоров'я трекінгу</h1><span class="badge">Реліз 1</span><span class="badge two">Дані: код сайтів + вивантаження CRM</span></div>
+    <p class="quote">Оцінка підрядників не збігається з реальністю: у CRM упізнається лише клік Google Ads, а решта звернень приходить без прив'язки до візиту.<cite>Питання, на яке відповідає сторінка</cite></p>
+    <p class="answers">Ця сторінка не виправляє атрибуцію. Вона показує <b>чому поточні цифри не збігаються з реальністю</b> — і скільки заявок узагалі мають джерело. Доки джерела немає, будь-яке правило розподілу дасть неправильну відповідь однаково впевнено.</p>
+    <div class="slicers"><span class="sl">Період <b>Серпень 2026</b></span><span class="sl">Сайт <b>company.example</b></span><span class="sl">Форма <b>Усі 5</b></span><span class="sl fixed">Аудит станом на <b>08.09.2026</b></span></div>
+    <div class="grid g4 mb" id="t1-tiles"></div>
+    <div class="grid wide mb">
+      <div class="card" data-pbi="Matrix + умовне форматування фону">
+        <span class="pbi"></span>
+        <h2>Що бачив сайт × що записано в CRM</h2>
+        <p class="cap">650 заявок за серпень. Рядок — джерело візиту за даними сайту, колонка — джерело, з яким заявка лягла в CRM.</p>
+        <div class="tw"><table class="mx" id="t-cross"></table></div>
+        <div class="note"><b>Ось та сама цифра.</b> 84 заявки на місяць CRM віддала рекламі, а привів їх органічний пошук — це 13% усього потоку й приблизно стільки ж грошей, помилково зарахованих не тому підряднику. Ще 194 заявки (нижній рядок) прийшли без жодного візиту в даних: це дзвінки, які поки не зіставляються з візитом.</div>
+      </div>
+      <div class="card" data-pbi="Stacked bar chart">
+        <span class="pbi"></span>
+        <h2>Стан ідентифікації заявок</h2>
+        <p class="cap">Скільком заявкам можна довіряти джерело без опитування клієнта.</p>
+        <div class="bars" id="b-ident"></div>
+        <div class="note"><b>Чому це метрика, а не технічна деталь.</b> Частка заявок із технічним джерелом — єдине число, яке визначає, наскільки взагалі можна вірити будь-якому звіту про канали. Ми виводимо його на початок і тримаємо в алертах: якщо воно впало, спершу ремонт, а не висновки.</div>
+      </div>
+    </div>
+    <div class="grid wide">
+      <div class="card" data-pbi="Table + іконки стану">
+        <span class="pbi"></span>
+        <h2>Реєстр знахідок аудиту</h2>
+        <p class="cap">Наша зона й поза нашою зоною розділені явно: частину виправляє розробка на своєму боці, ми даємо ТЗ і перевіряємо.</p>
+        <div class="tw"><table id="t-audit"></table></div>
+        <div class="note"><b>Наша мета</b> — щоб перед побудовою вітрин було ясно, що можна склеїти, що не можна ніколи, і чиїми руками робиться кожне виправлення.</div>
+      </div>
+      <div class="card" data-pbi="Power Automate / скрипт — не візуал Power BI">
+        <span class="pbi"></span>
+        <h2>Алерти в Telegram</h2>
+        <p class="cap">Реліз 2. Не звіт — три правила з порогами. Тиждень без відхилень приходить без повідомлень узагалі.</p>
+        <div class="tg">
+          <div class="tg-h"><div class="tg-av">Н</div><div><div class="n">Netpeak · трекінг ОХ</div><div class="s">бот, 3 правила</div></div></div>
+          <div class="tg-b">
+            <div class="msg">
+              <h4>Частка заявок без джерела зросла</h4>
+              <div class="when">сьогодні, 06:12</div>
+              <div class="mr"><span class="k">Було, середнє за 4 тижні</span><span class="v">29,8%</span></div>
+              <div class="mr"><span class="k">Стало, за тиждень</span><span class="v">41,2%</span></div>
+              <div class="flags">Поріг +7 п.п. пройдено. Ймовірна причина: форма «Замовити консультацію» на сторінці ТЗІ не надсилає подію з 04.09. Перевірити перед тим, як дивитись на канали.</div>
+              <div class="tg-t">06:12</div>
+            </div>
+            <div class="msg">
+              <h4>Дзвінки поки не зіставляються з візитом</h4>
+              <div class="when">пн, 06:00</div>
+              <div class="flags">Правило спрацьовуватиме щотижня, доки зв’язок дзвінка з візитом не налаштований. Конфігурацію перевіряємо в аудиті — після виправлення повідомлення вимкнеться.</div>
+              <div class="tg-t">06:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 ВОРОНКА ============ -->
+  <section id="p2" role="tabpanel" hidden>
+    <div class="ph"><h1>Воронка по стадіях і каналах</h1><span class="badge">Реліз 3</span><span class="badge two">Розріз по каналах — з релізу 4</span></div>
+    <p class="quote">Цикл угоди — від тижня до року, і не видно, який канал доходить до підпису, а який дає багато заявок і жодної угоди.<cite>Питання, на яке відповідає сторінка</cite></p>
+    <p class="answers">Чотири стадії, як вони влаштовані у вас: <b>заявка → кваліфікований лід → угода створена (є сума) → угода успішна</b>. Канали порівнюються не за кількістю заявок, а за проходженням кожної стадії: канал, який дає багато заявок і не дає угод, тут видно відразу.</p>
+    <div class="slicers"><span class="sl">Період <b>Вер 2025 – сер 2026</b></span><span class="sl">Напрямок <b>Усі</b></span><span class="sl">Менеджер <b>Усі</b></span><span class="sl fixed">Угод у вибірці <b>438</b></span></div>
+    <div class="grid g4 mb" id="t2-tiles"></div>
+    <div class="grid wide mb">
+      <div class="card" data-pbi="Funnel">
+        <span class="pbi"></span>
+        <h2>Чотири стадії</h2>
+        <p class="cap">Праворуч — конверсія з попередньої стадії і скільком заявкам це відповідає.</p>
+        <div class="funnel" id="funnel"></div>
+        <div class="note"><b>Вузьке місце — не там, де його шукають.</b> Найбільша втрата між кваліфікованим лідом і створеною угодою: доходить 44,7%. Це зона продажів, і звіт показує її окремо, щоб на неї не списували маркетинг і навпаки.</div>
+      </div>
+      <div class="card" data-pbi="Matrix + умовне форматування">
+        <span class="pbi"></span>
+        <h2>Ймовірність закриття: стадія × вік угоди</h2>
+        <p class="cap">Угода на «Договорі» віком 20 днів і віком 200 днів — різні угоди.</p>
+        <div class="tw"><table class="mx" id="t-age"></table></div>
+        <div class="note"><b>Навіщо вік.</b> Плоска ймовірність для «Комерційної пропозиції» дала б 36% для всіх, і угода віком 200 днів рахувалась би вчетверо дорожче, ніж вона варта. Саме ця таблиця робить «гроші в роботі» на екрані керівника числом, а не сумою всього, що висить.</div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="pbi"></span>
+      <h2>Канали на кожній стадії</h2>
+      <p class="cap">Конверсія зі стадії в стадію. Канал — джерело візиту, а не поле «джерело» в CRM: там, де візиту не бачили, стоїть окремий рядок, і це не канал.</p>
+      <div class="tw"><table class="mx" id="t-chst"></table></div>
+      <div class="note"><b>Що з цього видно вже в релізі 3.</b> PR і рекомендації дають найменше заявок і найкраще проходження всіх стадій — 11,0% від заявки до підпису проти 4,4% у Google-рекламі. Грошей на цій сторінці ще немає: скільки коштує заявка кожного напрямку, показує дослідження, а вклад каналу в дохід — реліз 4. Ми свідомо не змішуємо ці цифри, доки на них не можна спертись.</div>
+    </div>
+  </section>
+
+  <!-- ============ 3 КЕРІВНИК ============ -->
+  <section id="p3" role="tabpanel" hidden>
+    <div class="ph"><h1>Екран керівника</h1><span class="badge">Реліз 6</span><span class="badge two">Оновлення щодня о 06:00</span></div>
+    <p class="quote">Комерційному директору потрібен один екран на хвилину, а керівництву — короткий текст у месенджері замість операційної деталізації.<cite>Питання, на яке відповідає сторінка</cite></p>
+    <p class="answers">Шість цифр і план-факт. Відкрив, подивився, закрив — сторінка розрахована на хвилину; усе, що потребує розбору, живе на двох наступних сторінках. Тому тут <b>немає жодної метрики, з якої не ухвалюється рішення</b>.</p>
+    <div class="slicers"><span class="sl">Період <b>Серпень 2026</b></span><span class="sl">Порівняння <b>до липня</b></span><span class="sl">Напрямок <b>Усі</b></span><span class="sl fixed">Оновлено <b>сьогодні 06:00</b></span></div>
+    <div class="grid g3 mb" id="t3-hero"></div>
+    <div class="grid g3 mb" id="t3-tiles"></div>
+    <div class="grid wide mb">
+      <div class="card" data-pbi="Matrix + смуги даних">
+        <span class="pbi"></span>
+        <h2>План і факт по напрямках</h2>
+        <p class="cap">Прогноз = факт плюс гроші в роботі, зважені за стадією і віком, з датою закриття в цьому місяці.</p>
+        <div class="tw"><table id="t-pf"></table></div>
+        <div class="note"><b>Куди дивитись.</b> Загальні 76% складені з двох різних історій: технічна безпека вже перевиконала план, БМР дав половину. Один напрямок тягне весь місяць, і без розрізу цього не видно.</div>
+      </div>
+      <div class="card" data-pbi="Table + іконки KPI">
+        <span class="pbi"></span>
+        <h2>Що потребує уваги</h2>
+        <p class="cap">Не текст, який хтось написав, а міри з порогами, узгодженими на прийманні. Порожня таблиця — нормальний стан.</p>
+        <div class="tw"><table id="t-alert"></table></div>
+        <div class="note"><b>Обмеження.</b> Це порогові правила, а не прогноз. Вони кажуть «відхилення є», а не «буде гірше».</div>
+      </div>
+    </div>
+    <div class="grid wide">
+      <div class="card" data-pbi="Power Automate / скрипт — не візуал Power BI">
+        <span class="pbi"></span>
+        <h2>Дайджест топ-керівництву</h2>
+        <p class="cap">Реліз 2. Понеділок 09:00, шість показників, план місяця в кожному повідомленні, до трьох позначок.</p>
+        <div class="tg" style="max-width:460px">
+          <div class="tg-h"><div class="tg-av">Н</div><div><div class="n">Netpeak · дайджест ОХ</div><div class="s">щопонеділка 09:00</div></div></div>
+          <div class="tg-b">
+            <div class="msg">
+              <h4>Тиждень 31.08 – 06.09</h4>
+              <div class="when">понеділок, 09:00</div>
+              <div class="mr"><span class="k">Закрито за місяць</span><span class="v">2,58 млн ₴ · 76% плану</span></div>
+              <div class="mr"><span class="k">Прогноз закриття</span><span class="v">3,18 млн ₴ · 94%</span></div>
+              <div class="mr"><span class="k">Гроші в роботі</span><span class="v">3,12 млн ₴</span></div>
+              <div class="mr"><span class="k">Якісних звернень</span><span class="v">98 за тиждень</span></div>
+              <div class="mr"><span class="k">Ціна звернення</span><span class="v">736 ₴ · +4%</span></div>
+              <div class="mr"><span class="k">Окупність за рік</span><span class="v">−12,8%</span></div>
+              <div class="flags">▲ БМР: 51% плану, відставання 568 тис ₴.<br>▲ Google-реклама за рік у мінусі: −56% за прибутком.<br>■ 14 угод «Договір» віком 120+ днів на 1,9 млн ₴.</div>
+              <div class="tg-t">09:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" data-pbi="Текстове поле">
+        <span class="pbi"></span>
+        <h2>Що ухвалюється на цій сторінці</h2>
+        <p class="cap">Кожна плитка — рішення, а не показник.</p>
+        <div class="steps">
+          <div><div class="h">Чи потрібне втручання цього тижня</div><div class="b">Закрито за місяць проти плану й поруч прогноз закриття. Через довгий цикл факт наростаючим до останнього тижня завжди виглядає провалом — без прогнозу керівник щомісяця бачить паніку на порожньому місці.</div></div>
+          <div><div class="h">На що можна розраховувати в наступні 90 днів</div><div class="b">Гроші в роботі, зважені за стадією і віком угоди. Це не прогноз доходу: це сума того, що вже в роботі, помножена на ймовірність закриття кожної угоди.</div></div>
+          <div><div class="h">Чи має сенс поточний розподіл бюджету</div><div class="b">Окупність за рік — єдина цифра, яка каже, чи має сенс усе інше. Вона рухається повільно, і саме тому стоїть на екрані, який відкривають щодня.</div></div>
+        </div>
+              </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 КАНАЛИ ============ -->
+  <section id="p4" role="tabpanel" hidden>
+    <div class="ph"><h1>Канали: вклад і окупність</h1><span class="badge">Релізи 4–5</span><span class="badge two">Вклад — реліз 4, прибуток — реліз 5</span></div>
+    <p class="quote">Немає способу порівняти канали за внеском у дохід і зрозуміти, чи окупився рекламний бюджет за прибутком.<cite>Питання, на яке відповідає сторінка</cite></p>
+    <p class="answers">Одна й та сама сума 9,28 млн ₴ розподілена трьома простими правилами. Кожне — арифметика, яку можна перевірити руками на будь-якій угоді. <b>Розбіжність між правилами і є мірою невизначеності:</b> там, де три цифри близькі, каналу можна вірити; там, де розходяться вдвічі — ми пишемо «не знаємо» й не будуємо на цьому рішень.</p>
+    <div class="slicers"><span class="sl">Період <b>Вер 2025 – сер 2026</b></span><span class="sl">Правило <b>Порівну між каналами</b></span><span class="sl">Напрямок <b>Усі</b></span><span class="sl fixed">Маржа від фінблоку на <b>01.07.2026</b></span></div>
+    <div class="grid g4 mb" id="t4-tiles"></div>
+    <div class="card mb" data-pbi="Clustered bar chart, 3 серії">
+      <span class="pbi"></span>
+      <h2>Скільки доходу належить каналу за трьома правилами</h2>
+      <p class="cap">Останній крок — уся заслуга останньому дотику, як рахується зараз. Порівну — усі канали ланцюжка ділять однаково. 40/20/40 — по 40% першому й останньому, 20% ділить середина.</p>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--c2)"></i>Останній крок</span>
+        <span><i class="sw" style="background:var(--c3)"></i>40/20/40</span>
+        <span><i class="sw" style="background:var(--c1)"></i>Порівну між каналами</span>
+      </div>
+      <div class="bars" id="b-rules"></div>
+      <div class="note"><b>Ось де ламається поточна оцінка.</b> За «останнім кроком» пошуку дістається 1,58 млн, за двома іншими правилами — 3,3–3,7 млн. Це та сама скарга, тільки в гривнях. А рядок «без визначеного джерела» за останнім кроком забирає 1,86 млн просто тому, що людина повернулась із закладки або подзвонила — і це не канал, у нього не можна вкласти більше грошей.</div>
+    </div>
+    <div class="grid wide">
+      <div class="card" data-pbi="Matrix + умовне форматування останньої колонки">
+        <span class="pbi"></span>
+        <h2>Вкладено → дохід → прибуток → окупність</h2>
+        <p class="cap">Маржа різна по каналах, бо канали приводять різні напрямки: Meta тягне пультову з маржею 62%, PR — БМР з маржею 21%.</p>
+        <div class="tw"><table id="t-roi"></table></div>
+        <div class="note"><b>Дохід і прибуток розходяться в різні боки.</b> За доходом портфель дає 2,39 ₴ на гривню — виглядає добре. За прибутком він у мінусі на 12,8%. Різницю створює маржа напрямків, а не робота реклами, і побачити це можна тільки поставивши обидві цифри в один рядок.</div>
+      </div>
+      <div class="card" data-pbi="Bar chart + референсна лінія">
+        <span class="pbi"></span>
+        <h2>Скільки варте одне звернення</h2>
+        <p class="cap">Результат дослідження з релізу 3: ймовірність угоди × середній чек напрямку. Це та цифра, яка перетворює звернення в гроші.</p>
+        <div class="bars" id="b-seg"></div>
+        <div class="note"><b>Звідки взялась ознака.</b> Напрямок послуги був гіпотезою й пройшов перевірку на іншому півріччі; тип клієнта — не пройшов і відкинутий. Усередині технічної безпеки Київ і область відрізняються за чеком у 1,7 раза, тому робоча ознака — напрямок × регіон. БМР показуємо з позначкою: 11 угод на рік, середні поїдуть від однієї нової угоди.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 КАРТКА Й ВИБІРКА ============ -->
+  <section id="p5" role="tabpanel" hidden>
+    <div class="ph"><h1>Картка угоди й довільна вибірка</h1><span class="badge">Реліз 6</span><span class="badge two">Повторні клієнти — реліз 7</span></div>
+    <p class="quote">Довільна вибірка за датою першого дотику, сумою і статусом зараз коштує пів дня ручної роботи щоразу.<cite>Питання, на яке відповідає сторінка</cite></p>
+    <p class="answers">Дві речі на одній сторінці: <b>вибірка</b> — фільтри по даті першого дотику, сумі й статусу без звернення до нас; <b>картка</b> — повний шлях однієї угоди, на якому модель перевіряється руками.</p>
+    <div class="card mb" data-pbi="Slicers + Table з деталізацією">
+      <span class="pbi"></span>
+      <h2>Довільна вибірка</h2>
+      <p class="cap">Той самий запит зі зустрічі, зібраний фільтрами.</p>
+      <div class="slicers"><span class="sl">Перший дотик <b>бер – кві 2026</b></span><span class="sl">Сума угоди <b>≥ 150 000 ₴</b></span><span class="sl">Статус <b>Успішна</b></span><span class="sl">Напрямок <b>Усі</b></span></div>
+      <div class="grid g3 mb" id="t5-tiles"></div>
+      <div class="tw"><table id="t-pick"></table></div>
+      <div class="note"><b>Чому це сторінка звіту, а не запит нам.</b> Такий запит приходить раз на тиждень і щоразу коштує пів дня комусь із вас або нам. Тут він займає три кліки, а вивантаження в Excel — четвертий. <b>Наша мета</b> — щоб по дрібні вибірки до нас не ходили.</div>
+    </div>
+    <div class="grid wide">
+      <div class="card" data-pbi="Table, відсортована за датою">
+        <span class="pbi"></span>
+        <h2>Картка угоди OB-2026-4471</h2>
+        <p class="cap">Усе, що система бачила по цій людині до підпису. Сума 1,84 млн ₴, БМР, Дніпропетровська обл., 169 днів від першого дотику.</p>
+        <div class="tl" id="tl-deal"></div>
+        <div class="note"><b>Ось на що дивитись.</b> Клієнт почав із органічного пошуку по загальному запиту про охорону периметра, п'ять місяців повертався й порівнював, а заявку залишив після кліку по <b>брендовій</b> рекламі — тобто коли вже шукав вас на ім'я. Кол-центру він сказав «знайшов у пошуку».</div>
+      </div>
+      <div class="card" data-pbi="Matrix, три міри">
+        <span class="pbi"></span>
+        <h2>Як поділилась заслуга</h2>
+        <p class="cap">Три правила на одній угоді. Кожне сумується до фактичних 1,84 млн ₴.</p>
+        <div class="tw"><table id="t-deal"></table></div>
+        <div class="note"><b>Навіщо ця сторінка в звіті.</b> Розподіл заслуги завжди виглядає як щось, що робиться десь усередині системи. Тут його видно на конкретній угоді, з датами й сумами, і будь-хто у вас може перевірити арифметику вручну. Якщо на своїх угодах ви скажете «не схоже на правду» — правило міняється, а не залишається як є.</div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+<div class="tt" id="tt" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var f=function(n,d){return Number(n).toLocaleString('uk-UA',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});};
+var pc=function(n,d){return Number(n).toLocaleString('uk-UA',{minimumFractionDigits:d===undefined?1:d,maximumFractionDigits:d===undefined?1:d})+'%';};
+
+/* ---------------- навігація ---------------- */
+var P=[
+ {id:'p0',g:0,t:'Карта питань',q:'Що на яке питання відповідає'},
+ {id:'p1',g:1,t:'1 · Здоров’я трекінгу',q:'Реліз 1 · чому цифрам не можна вірити зараз'},
+ {id:'p2',g:1,t:'2 · Воронка по стадіях',q:'Реліз 3 · де губимо і який канал доходить'},
+ {id:'p3',g:2,t:'3 · Екран керівника',q:'Реліз 6 · чи все нормально — за хвилину'},
+ {id:'p4',g:2,t:'4 · Канали: вклад і окупність',q:'Релізи 4–5 · кому належить дохід'},
+ {id:'p5',g:2,t:'5 · Картка й вибірка',q:'Реліз 6 · перевірити руками, знайти сегмент'}
+];
+var boxes=document.querySelectorAll('.pages');
+P.forEach(function(p,i){
+  var b=document.createElement('button');b.className='pg';b.type='button';b.setAttribute('role','tab');
+  b.setAttribute('aria-controls',p.id);b.setAttribute('aria-selected',i===0?'true':'false');
+  b.innerHTML='<span class="t"></span><span class="q"></span>';
+  b.querySelector('.t').textContent=p.t;b.querySelector('.q').textContent=p.q;
+  b.addEventListener('click',function(){show(p.id);});
+  boxes[p.g].appendChild(b);
+});
+function show(id){
+  P.forEach(function(p){document.getElementById(p.id).hidden=(p.id!==id);});
+  document.querySelectorAll('.pg').forEach(function(b){
+    b.setAttribute('aria-selected',b.getAttribute('aria-controls')===id?'true':'false');});
+  window.scrollTo({top:0,behavior:'auto'});
+}
+/* бейджі типів візуалів */
+document.querySelectorAll('.card').forEach(function(c){
+  var s=c.querySelector('.pbi');if(!s)return;
+  s.textContent=c.getAttribute('data-pbi')||'Visual';
+});
+document.getElementById('pbi-toggle').addEventListener('change',function(e){
+  document.body.classList.toggle('show-pbi',e.target.checked);});
+
+/* ---------------- підказки ---------------- */
+var tt=document.getElementById('tt');
+function tip(el,h){
+  el.addEventListener('mouseenter',function(){tt.innerHTML=h;tt.style.opacity=1;});
+  el.addEventListener('mousemove',function(e){var x=e.clientX+14,y=e.clientY+16;
+    if(x+290>window.innerWidth)x=e.clientX-294;if(y+120>window.innerHeight)y=e.clientY-104;
+    tt.style.left=x+'px';tt.style.top=y+'px';});
+  el.addEventListener('mouseleave',function(){tt.style.opacity=0;});
+}
+function brow(box){var r=document.createElement('div');r.className='brow';box.appendChild(r);return r;}
+function tiles(box,arr){
+  box.innerHTML=arr.map(function(t){
+    return '<div class="tile'+(t.hero?' hero':'')+'"><div class="lab">'+t.lab+'</div>'+
+      '<div class="val"'+(t.color?' style="color:'+t.color+'"':'')+'>'+t.val+(t.unit?' <small>'+t.unit+'</small>':'')+'</div>'+
+      (t.sub?'<div class="sub">'+t.sub+'</div>':'')+
+      (t.dec?'<div class="dec"><i>рішення:</i> '+t.dec+'</div>':'')+'</div>';}).join('');
+}
+/* умовне форматування: значення → крок рампу */
+function cf(v,max){
+  var k=Math.max(0,Math.min(6,Math.round(v/max*6)));
+  return 'background:var(--r'+(k+1)+');color:var(--'+(k>=4?'on-r-hi':'on-r-lo')+')';
+}
+
+/* ================= ДАНІ ================= */
+var TOTR=9282000, SPEND=3882000;
+
+/* канали: заявки → квал → угода створена → успішна; витрати; правила; маржа міксу */
+var CH=[
+ {n:'Google-реклама',        s:[2180,1447,620,96], spend:2100000, last:4316000, even:1945000, pos:2380000, marg:.48, cyc:34},
+ {n:'Пошук / органіка',      s:[2460,1679,790,152],spend:576000,  last:1580000, even:3664000, pos:3310000, marg:.31, cyc:63},
+ {n:'Meta',                  s:[1120,681,268,43],  spend:744000,  last:939000,  even:591000,  pos:720000,  marg:.58, cyc:41},
+ {n:'LinkedIn',              s:[180,100,41,6],     spend:42000,   last:197000,  even:302000,  pos:242000,  marg:.25, cyc:112, weak:true},
+ {n:'PR і рекомендації',     s:[720,602,342,79],   spend:420000,  last:390000,  even:1548000, pos:1210000, marg:.2607, cyc:96},
+ {n:'Без визначеного джерела',s:[1140,771,299,62], spend:0,       last:1860000, even:1232000, pos:1420000, marg:.40, cyc:18, nosrc:true}
+];
+CH.forEach(function(c){c.profit=Math.round(c.even*c.marg);});
+
+var SEG=[
+ {n:'Пультова охорона',      leads:2180,p:11.4,med:5900,  chk:7400,  deals:248,rev:1839000,val:844, marg:62},
+ {n:'Фізична охорона, ГШР',  leads:1240,p:7.8, med:11800, chk:15200, deals:97, rev:1470000,val:1186,marg:38},
+ {n:'Технічна безпека',      leads:980, p:6.1, med:19500, chk:29000, deals:60, rev:1734000,val:1769,marg:29},
+ {n:'Протипожежний, ТЗІ',    leads:520, p:4.2, med:48000, chk:74000, deals:22, rev:1616000,val:3108,marg:34},
+ {n:'БМР і проєктні',        leads:360, p:3.1, med:142000,chk:235000,deals:11, rev:2623000,val:7285,marg:21,weak:true}
+];
+
+/* ================= 0 КАРТА ================= */
+(function(){
+ var M=[
+  ['Оцінка підрядників не збігається з реальністю: у CRM упізнається лише клік Google Ads',
+   'Частка звернень із технічним джерелом · матриця «джерело сайту × джерело CRM»',
+   '1 · Здоров’я трекінгу','Реліз 1'],
+  ['Немає способу порівняти канали за проходженням угоди',
+   'Конверсія кожного каналу на 4 стадіях → вклад каналу в дохід за трьома правилами',
+   '2 · Воронка, далі 4 · Канали','Релізи 3–4'],
+  ['Цикл угоди до року: заслуга має зараховуватись, поки угода ще в роботі',
+   'Ймовірність стадія × вік → гроші в роботі, зважені за стадією і віком',
+   '2 · Воронка, далі 3 · Екран керівника','Релізи 3, 6'],
+  ['Ретроспектива збирається руками, тому рішення ухвалюються із запізненням',
+   'Щоденні зрізи статусів CRM; усі сторінки перераховуються самі щодня о 06:00',
+   'усі сторінки','Реліз 2'],
+  ['Довільна вибірка за датою першого дотику, сумою і статусом коштує пів дня ручної роботи',
+   'Фільтри по даті першого дотику, сумі й статусу + вивантаження в Excel',
+   '5 · Довільна вибірка','Реліз 6'],
+  ['Керівництву потрібен короткий текст у месенджері, а не сторінка звіту',
+   'Дайджест щопонеділка о 09:00; алерти по порогах приходять окремо',
+   'Дайджест і алерти, не сторінки звіту','Реліз 2'],
+  ['Комерційному директору потрібен один екран на хвилину',
+   'Шість плиток і план-факт; кожна плитка підписана рішенням, яке з неї ухвалюють',
+   '3 · Екран керівника','Реліз 6'],
+  ['Не видно, скільки клієнт приносить за весь час',
+   'Клієнтський ключ, дохід на клієнта, частка повторних угод',
+   '4 · Канали, блок «нові й повторні»','Реліз 7']
+ ];
+ var h='<thead><tr><th class="wrap">Питання, яке стоїть зараз</th><th class="wrap">Метрика, що на нього відповідає</th><th class="wrap">Сторінка</th><th>Реліз</th></tr></thead><tbody>';
+ M.forEach(function(r){
+  h+='<tr><td class="wrap">'+r[0]+'</td><td class="wrap dim">'+r[1]+'</td><td class="wrap">'+r[2]+'</td>'+
+     '<td><span class="tag '+(r[3]==='1'?'g':'n')+'">'+r[3]+'</span></td></tr>';});
+ document.getElementById('t-map').innerHTML=h+'</tbody>';
+
+ var N=[
+  ['Поведінка клієнтів в особистому кабінеті','Особистий кабінет клієнтів не має аналітики взагалі. Повторні угоди й дохід на клієнта рахуються з CRM у релізі 7; поведінка в кабінеті — фаза 2, окремою оцінкою.'],
+  ['Прогноз доходу','Ми показуємо гроші в роботі, зважені за стадією і віком, — це не прогноз. Прогнозної моделі в цій послузі немає, і на 438 угодах на рік вона вивчала б шум.'],
+  ['Профіль конкретного клієнта, як у CDP','eSputnik відповідає на питання «що з цим клієнтом», ці звіти — на питання «що з каналами й воронкою». Різні інструменти, не заміна один одному.']
+ ];
+ document.getElementById('s-none').innerHTML=N.map(function(x){
+  return '<div><div class="h">'+x[0]+'</div><div class="b">'+x[1]+'</div></div>';}).join('');
+})();
+
+/* ================= 1 ТРЕКІНГ ================= */
+(function(){
+ tiles(document.getElementById('t1-tiles'),[
+  {lab:'Заявок і дзвінків за місяць',val:'650',sub:'усі канали, з вивантаження CRM',dec:'база, до якої рахуються всі частки нижче'},
+  {lab:'Із технічним джерелом',val:'28,8',unit:'%',sub:'187 заявок · тільки приховане поле gclid',dec:'скільком заявкам можна вірити без опитування',color:'var(--crit)'},
+  {lab:'Джерело сайту ≠ джерело CRM',val:'23,2',unit:'%',sub:'151 заявка розходиться',dec:'наскільки помиляється поточна оцінка підрядників',color:'var(--crit)'},
+  {lab:'Дзвінків склеєно з візитом',val:'0',unit:'%',sub:'підмінні номери працюють, зв’язок із візитом не налаштований',dec:'обсяг робіт по колтрекінгу — з’ясовує аудит',color:'var(--crit)'}
+ ]);
+
+ /* стан ідентифікації */
+ var ID=[
+  {n:'gclid у формі',v:187,note:'єдина технічна ознака, що є зараз'},
+  {n:'Тільки дзвінок',v:148,note:'дзвінок без зіставленого візиту'},
+  {n:'Слова клієнта в кол-центрі',v:121,note:'вручну, не перевіряється'},
+  {n:'Без жодної ознаки',v:194,note:'джерело невідоме'}
+ ];
+ var b=document.getElementById('b-ident'),tot=650;
+ ID.forEach(function(x,i){
+  var r=brow(b);
+  r.innerHTML='<div class="name">'+x.n+'</div><div class="bar"><span class="fill" style="width:'+(x.v/tot*100)+'%;background:var(--r'+(6-i)+')"></span>'+
+   '<span class="v"><b>'+pc(x.v/tot*100)+'</b> · '+f(x.v)+'</span></div>';
+  tip(r,'<b>'+x.n+'</b><br>'+f(x.v)+' із 650 заявок<br>'+x.note);});
+
+ /* матриця сайт × CRM */
+ var ROWS=[
+  ['Клік Google Ads (gclid)',[132,8,31,16]],
+  ['Органічний пошук',[84,22,19,14]],
+  ['Meta',[12,41,9,7]],
+  ['Прямий захід',[9,14,22,16]],
+  ['Візиту не бачили',[0,0,96,98]]
+ ];
+ var COLS=['«Реклама»','«Органіка / сайт»','«Дзвінок»','Не вказано'];
+ var mx=132;
+ var h='<thead><tr><th class="wrap">Що бачив сайт</th>'+COLS.map(function(c){return '<th>'+c+'</th>';}).join('')+'<th>Разом</th></tr></thead><tbody>';
+ var tc=[0,0,0,0];
+ ROWS.forEach(function(r,ri){
+  var s=r[1].reduce(function(a,x){return a+x;},0);
+  h+='<tr><td>'+r[0]+'</td>';
+  r[1].forEach(function(v,ci){
+   tc[ci]+=v;
+   var isHi=(ri===1&&ci===0);
+   h+='<td class="cf'+(isHi?' hi':'')+'" style="'+cf(v,mx)+'">'+f(v)+'</td>';});
+  h+='<td class="dim">'+f(s)+'</td></tr>';});
+ h+='</tbody><tfoot><tr><td>Разом</td>'+tc.map(function(v){return '<td>'+f(v)+'</td>';}).join('')+'<td>650</td></tr></tfoot>';
+ document.getElementById('t-cross').innerHTML=h;
+
+ /* реєстр знахідок */
+ var A=[
+  ['Немає utm_* у формах','Усе, крім Google Ads, приходить у CRM без джерела','Розробка клієнта, ТЗ від нас','c','Клієнт'],
+  ['Зв’язок дзвінка з візитом не налаштований','Близько 30% потоку — дзвінки без джерела','Перевіряємо в аудиті','w','Реліз 1'],
+  ['Другий потік GA4 у preload','Слід міграції, ризик подвійних даних','Ми','w','Реліз 1'],
+  ['Consent Mode і CMP немає','Юридичний ризик і пропуски в Google Ads','Юристи й розробка клієнта','c','Клієнт'],
+  ['Як CRM пише «джерело» — зовні не видно','Невідомо, що саме зараз рахується рекламою','Ми, перша задача аудиту','w','Реліз 1']
+ ];
+ var ah='<thead><tr><th class="wrap">Знахідка</th><th class="wrap">Що це ламає</th><th class="wrap">Хто виправляє</th><th>Коли</th></tr></thead><tbody>';
+ A.forEach(function(r){ah+='<tr><td class="wrap">'+r[0]+'</td><td class="wrap dim">'+r[1]+'</td><td class="wrap">'+r[2]+'</td>'+
+   '<td><span class="tag '+r[3]+'">'+r[4]+'</span></td></tr>';});
+ document.getElementById('t-audit').innerHTML=ah+'</tbody>';
+})();
+
+/* ================= 2 ВОРОНКА ================= */
+(function(){
+ var F=[
+  {s:'Заявка з сайту або дзвінок',n:7800},
+  {s:'Кваліфікований лід (кол-центр)',n:5280},
+  {s:'Угода створена, є сума',n:2360},
+  {s:'Угода успішна',n:438}
+ ];
+ tiles(document.getElementById('t2-tiles'),[
+  {lab:'Заявок і дзвінків за рік',val:f(7800),dec:'обсяг, з якого рахуються всі конверсії'},
+  {lab:'Кваліфіковано кол-центром',val:'67,7',unit:'%',sub:f(5280)+' лідів',dec:'якість потоку: скільки заявок узагалі реальні'},
+  {lab:'Стали угодою з сумою',val:'44,7',unit:'%',sub:f(2360)+' угод',color:'var(--crit)',dec:'головна втрата — і вона в продажах'},
+  {lab:'Дійшли до підпису',val:'18,6',unit:'%',sub:'438 угод · 9,28 млн ₴',dec:'база для «скільки варте звернення»'}
+ ]);
+ var fb=document.getElementById('funnel');
+ F.forEach(function(x,i){
+  var w=Math.max(x.n/F[0].n*100,9);
+  var r=document.createElement('div');r.className='fst';
+  r.innerHTML='<div><div class="fbar" style="width:'+w+'%">'+f(x.n)+'</div></div>'+
+   '<div class="fl">'+(i===0?'<b>100%</b>усі заявки':'<b>'+pc(x.n/F[i-1].n*100)+'</b>з попередньої · '+pc(x.n/F[0].n*100)+' від заявок')+'</div>';
+  fb.appendChild(r);
+  tip(r,'<b>'+x.s+'</b><br>'+f(x.n)+' записів<br>від усіх заявок '+pc(x.n/F[0].n*100));});
+
+ /* стадія × вік */
+ var R=[['Кваліфікований лід',12,9,5,2],['Угода створена',24,19,11,4],['Комерційна пропозиція',41,34,22,9],['Договір на погодженні',78,66,44,19]];
+ var C=['0–30 дн','31–60','61–120','120+'];
+ var h='<thead><tr><th>Стадія</th>'+C.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>';
+ R.forEach(function(r){h+='<tr><td>'+r[0]+'</td>';
+  for(var j=1;j<=4;j++){h+='<td class="cf" style="'+cf(r[j],80)+'">'+r[j]+'%</td>';}
+  h+='</tr>';});
+ document.getElementById('t-age').innerHTML=h+'</tbody>';
+
+ /* канал × стадія */
+ var ch='<thead><tr><th class="wrap">Канал <span class="mark">джерело візиту</span></th><th>Заявок</th><th>→ квал. лід</th><th>→ угода</th><th>→ успіх</th><th>Від заявки до підпису</th><th>Медіанний цикл</th></tr></thead><tbody>';
+ var T=[0,0,0,0];
+ CH.forEach(function(c){
+  var s=c.s;T[0]+=s[0];T[1]+=s[1];T[2]+=s[2];T[3]+=s[3];
+  var e2e=s[3]/s[0]*100;
+  ch+='<tr><td>'+c.n+(c.nosrc?' <span class="mark">не канал</span>':'')+(c.weak?' <span class="mark">мало даних</span>':'')+'</td>'+
+   '<td class="num">'+f(s[0])+'</td>'+
+   '<td class="cf" style="'+cf(s[1]/s[0]*100,85)+'">'+pc(s[1]/s[0]*100,0)+'</td>'+
+   '<td class="cf" style="'+cf(s[2]/s[1]*100,85)+'">'+pc(s[2]/s[1]*100,0)+'</td>'+
+   '<td class="cf" style="'+cf(s[3]/s[2]*100,85)+'">'+pc(s[3]/s[2]*100,0)+'</td>'+
+   '<td class="num"><b>'+pc(e2e)+'</b></td>'+
+   '<td class="num dim">'+c.cyc+' дн.</td></tr>';});
+ ch+='</tbody><tfoot><tr><td>Разом</td><td class="num">'+f(T[0])+'</td>'+
+  '<td class="num">'+pc(T[1]/T[0]*100,0)+'</td><td class="num">'+pc(T[2]/T[1]*100,0)+'</td>'+
+  '<td class="num">'+pc(T[3]/T[2]*100,0)+'</td><td class="num">'+pc(T[3]/T[0]*100)+'</td><td class="num dim">41 дн.</td></tr></tfoot>';
+ document.getElementById('t-chst').innerHTML=ch;
+})();
+
+/* ================= 3 КЕРІВНИК ================= */
+(function(){
+ tiles(document.getElementById('t3-hero'),[
+  {hero:1,lab:'Закрито за місяць',val:'2,58',unit:'млн ₴',sub:'76% плану · лишилось 8 робочих днів',dec:'чи потрібне втручання цього тижня'},
+  {hero:1,lab:'Прогноз закриття',val:'3,18',unit:'млн ₴',color:'var(--c1)',sub:'94% плану · факт + гроші в роботі',dec:'чи є сенс піднімати тривогу зараз'},
+  {hero:1,lab:'Окупність за рік',val:'−12,8',unit:'%',color:'var(--crit)',sub:'вкладено 3,88 млн, прибуток 3,38 млн',dec:'чи має сенс поточний розподіл бюджету'}
+ ]);
+ tiles(document.getElementById('t3-tiles'),[
+  {lab:'Гроші в роботі',val:'3,12',unit:'млн ₴',sub:'зважено за стадією і віком · <span class="d-up">▲ 6%</span>',dec:'на що можна розраховувати в наступні 90 днів'},
+  {lab:'Якісних звернень',val:'440',sub:'із 650 заявок · 67,7%',dec:'чи є взагалі вхідний потік'},
+  {lab:'Ціна якісного звернення',val:'736',unit:'₴',sub:'<span class="d-dn">▲ 4%</span> до липня',dec:'чи не дорожчає трафік швидше за чек'}
+ ]);
+ var PF=[['Пультова охорона',620,512,598],['Фізична охорона, ГШР',490,441,512],['Технічна безпека',580,623,694],
+         ['Протипожежний, ТЗІ',540,402,498],['БМР і проєктні',1170,602,878]];
+ var h='<thead><tr><th class="wrap">Напрямок</th><th>План, тис ₴</th><th>Факт, тис ₴</th><th>Виконано</th><th>Прогноз, тис ₴</th><th>Відхилення</th></tr></thead><tbody>';
+ var tp=0,tf=0,tfc=0;
+ PF.forEach(function(x){
+  var pl=x[1],fa=x[2],fc=x[3],d=fc-pl;tp+=pl;tf+=fa;tfc+=fc;
+  var cls=fa/pl>=1?'pos':(fa/pl<0.6?'neg':'');
+  h+='<tr><td>'+x[0]+'</td><td class="num">'+f(pl)+'</td><td class="num">'+f(fa)+'</td>'+
+   '<td class="num '+cls+'">'+pc(fa/pl*100,0)+'</td><td class="num">'+f(fc)+'</td>'+
+   '<td class="num '+(d>=0?'pos':'neg')+'">'+(d>0?'+':'')+f(d)+'</td></tr>';});
+ h+='</tbody><tfoot><tr><td>Разом</td><td class="num">'+f(tp)+'</td><td class="num">'+f(tf)+'</td>'+
+  '<td class="num">'+pc(tf/tp*100,0)+'</td><td class="num">'+f(tfc)+'</td><td class="num neg">'+f(tfc-tp)+'</td></tr></tfoot>';
+ document.getElementById('t-pf').innerHTML=h;
+
+ var AL=[
+  ['Окупність Google-реклами за рік','−56%','нижче −20%','c','Критично'],
+  ['Виконання плану, БМР','51%','нижче 70% після 20 числа','c','Критично'],
+  ['Угоди «Договір» віком 120+ днів','14 угод · 1,9 млн ₴','понад 10 угод','w','Увага'],
+  ['Частка заявок без джерела','29,8%','понад 25%','w','Увага'],
+  ['Окупність пошуку за рік','+97%','нижче −20%','g','Норма']
+ ];
+ var ah='<thead><tr><th class="wrap">Правило</th><th>Факт</th><th class="wrap">Поріг</th><th>Стан</th></tr></thead><tbody>';
+ AL.forEach(function(r){ah+='<tr><td class="wrap">'+r[0]+'</td><td class="num">'+r[1]+'</td>'+
+   '<td class="wrap dim">'+r[2]+'</td><td><span class="tag '+r[3]+'">'+r[4]+'</span></td></tr>';});
+ document.getElementById('t-alert').innerHTML=ah+'</tbody>';
+})();
+
+/* ================= 4 КАНАЛИ ================= */
+(function(){
+ var tp=0;CH.forEach(function(c){tp+=c.profit;});
+ tiles(document.getElementById('t4-tiles'),[
+  {lab:'Вкладено за рік',val:'3,88',unit:'млн ₴',sub:'усі канали з витратами',dec:'знаменник окупності'},
+  {lab:'Дохід',val:'9,28',unit:'млн ₴',sub:'2,39 ₴ на кожну вкладену гривню',dec:'як виглядає картина без маржі'},
+  {lab:'Прибуток',val:'3,38',unit:'млн ₴',sub:'середньозважена маржа 36,5%',dec:'як вона виглядає з маржею'},
+  {lab:'Окупність',val:'−12,8',unit:'%',color:'var(--crit)',sub:'прибуток мінус витрати',dec:'скільком каналам треба міняти бюджет'}
+ ]);
+ /* три правила */
+ var b=document.getElementById('b-rules'),mx=4316000;
+ CH.forEach(function(c){
+  var lo=Math.min(c.last,c.even,c.pos),hi=Math.max(c.last,c.even,c.pos);
+  var r=brow(b);
+  r.innerHTML='<div class="name">'+c.n+(c.nosrc?'<br><span class="mark">не канал</span>':'')+'</div><div class="stack">'+
+   '<div class="bar sm"><span class="fill" style="width:'+(c.last/mx*100)+'%;background:var(--c2)"></span><span class="v">'+f(c.last/1000)+'</span></div>'+
+   '<div class="bar sm"><span class="fill" style="width:'+(c.pos/mx*100)+'%;background:var(--c3)"></span><span class="v">'+f(c.pos/1000)+'</span></div>'+
+   '<div class="bar"><span class="fill" style="width:'+(c.even/mx*100)+'%;background:var(--c1)"></span>'+
+     '<span class="v"><b>'+f(c.even/1000)+' тис ₴</b> <span class="dim">розкид ×'+(hi/lo).toFixed(1)+'</span></span></div></div>';
+  tip(r,'<b>'+c.n+'</b><br>останній крок '+f(c.last)+' ₴<br>40/20/40 '+f(c.pos)+' ₴<br>порівну '+f(c.even)+' ₴<br>діапазон '+f(lo/1000)+'–'+f(hi/1000)+' тис ₴');});
+
+ /* окупність */
+ var h='<thead><tr><th class="wrap">Канал</th><th>Вкладено, тис ₴</th><th>Дохід, тис ₴</th><th>Маржа</th><th>Прибуток, тис ₴</th><th>Окупність</th></tr></thead><tbody>';
+ var ts=0,tr=0,tpr=0;
+ CH.forEach(function(c){
+  var d=c.profit-c.spend,roi=c.spend?d/c.spend*100:null;
+  ts+=c.spend;tr+=c.even;tpr+=c.profit;
+  h+='<tr><td>'+c.n+(c.nosrc?' <span class="mark">не канал</span>':'')+'</td>'+
+   '<td class="num">'+(c.spend?f(c.spend/1000):'<span class="dim">—</span>')+'</td>'+
+   '<td class="num dim">'+f(c.even/1000)+'</td><td class="num dim">'+pc(c.marg*100,0)+'</td>'+
+   '<td class="num">'+f(c.profit/1000)+'</td>'+
+   '<td class="num">'+(c.weak?'<span class="dim">даних замало</span>':(roi===null?'<span class="dim">витрат немає</span>':'<b class="'+(roi>=0?'pos':'neg')+'">'+(roi>0?'+':'')+pc(roi,0)+'</b>'))+'</td></tr>';});
+ var td=tpr-ts;
+ h+='</tbody><tfoot><tr><td>Разом</td><td class="num">'+f(ts/1000)+'</td><td class="num">'+f(tr/1000)+'</td>'+
+  '<td class="num">'+pc(tpr/tr*100)+'</td><td class="num">'+f(tpr/1000)+'</td>'+
+  '<td class="num neg">'+pc(td/ts*100)+'</td></tr></tfoot>';
+ document.getElementById('t-roi').innerHTML=h;
+
+ /* скільки варте звернення */
+ var sb=document.getElementById('b-seg'),smx=7285;
+ SEG.forEach(function(s){
+  var r=brow(sb);
+  r.innerHTML='<div class="name">'+s.n+(s.weak?'<br><span class="mark">11 угод/рік</span>':'')+'</div>'+
+   '<div class="bar"><span class="fill" style="width:'+(s.val/smx*100)+'%;background:var(--c1)"></span>'+
+   '<span class="v"><b>'+f(s.val)+' ₴</b> <span class="dim">чек '+f(s.chk)+', медіана '+f(s.med)+'</span></span></div>';
+  tip(r,'<b>'+s.n+'</b><br>'+pc(s.p)+' звернень стають угодою<br>× середній чек '+f(s.chk)+' ₴<br>= '+f(s.val)+' ₴ за звернення<br>маржа напрямку '+s.marg+'%');});
+})();
+
+/* ================= 5 КАРТКА Й ВИБІРКА ================= */
+(function(){
+ tiles(document.getElementById('t5-tiles'),[
+  {lab:'Угод у вибірці',val:'14'},
+  {lab:'Сума',val:'5,24',unit:'млн ₴'},
+  {lab:'Медіанний цикл',val:'121',unit:'дн.'}
+ ]);
+ var PK=[
+  ['OB-2026-4471','12.03.2026','28.08.2026','БМР і проєктні',1840000,4],
+  ['OB-2026-4302','19.03.2026','04.08.2026','Протипожежний, ТЗІ',486000,2],
+  ['OB-2026-4415','28.03.2026','12.08.2026','Фізична охорона, ГШР',268000,1],
+  ['OB-2026-4288','02.04.2026','21.07.2026','Технічна безпека',312000,3],
+  ['OB-2026-4356','11.04.2026','30.07.2026','Технічна безпека',205000,2],
+  ['OB-2026-4390','07.04.2026','19.08.2026','Пультова охорона',158000,3]
+ ];
+ var h='<thead><tr><th>Угода</th><th>Перший дотик</th><th>Підписано</th><th class="wrap">Напрямок</th><th>Сума, ₴</th><th>Каналів у ланцюжку</th></tr></thead><tbody>';
+ PK.forEach(function(r){h+='<tr><td>'+r[0]+'</td><td class="num dim">'+r[1]+'</td><td class="num dim">'+r[2]+'</td>'+
+   '<td class="wrap">'+r[3]+'</td><td class="num"><b>'+f(r[4])+'</b></td><td class="num">'+r[5]+'</td></tr>';});
+ h+='</tbody><tfoot><tr><td colspan="4">Показано 6 із 14 · решта у вивантаженні</td><td class="num">5 240 000</td><td class="num">2,6 сер.</td></tr></tfoot>';
+ document.getElementById('t-pick').innerHTML=h;
+
+ var TL=[
+  ['12.03.2026','Органічний пошук','запит «охорона периметра підприємства», 6 хв, 4 сторінки',false],
+  ['04.04.2026','Meta','клік по оголошенню про технічну безпеку, 40 сек',false],
+  ['19.05.2026','Прямий захід','сторінка «Ціни», 3 хв — заявку не залишив',false],
+  ['21.06.2026','Google-реклама','брендовий запит із назвою компанії → заявка з форми',true],
+  ['21.06.2026','Кол-центр','прекваліфіковано. На питання «звідки дізналися» — «знайшов у пошуку»',false],
+  ['03.07.2026','Угоду створено','сума 1,84 млн ₴, менеджер готує пропозицію',false],
+  ['28.08.2026','Договір підписано','1 840 000 ₴, БМР',false]
+ ];
+ document.getElementById('tl-deal').innerHTML=TL.map(function(x,i){
+  return '<div class="tlr'+(x[3]?' key':'')+'"><div class="d">'+x[0]+'</div>'+
+   '<div class="g">'+(i<TL.length-1?'<i></i>':'')+'<s></s></div>'+
+   '<div class="c"><b>'+x[1]+'</b><span>'+x[2]+'</span></div></div>';}).join('');
+
+ var D=[['Органічний пошук',0,460,736],['Meta',0,460,184],['Прямий захід',0,460,184],['Google-реклама',1840,460,736]];
+ var dh='<thead><tr><th class="wrap">Канал у ланцюжку</th><th>Останній крок,<br>тис ₴</th><th>Порівну,<br>тис ₴</th><th>40/20/40,<br>тис ₴</th></tr></thead><tbody>';
+ D.forEach(function(x){dh+='<tr><td>'+x[0]+'</td>'+
+   '<td class="num'+(x[1]?'':' dim')+'">'+f(x[1])+'</td>'+
+   '<td class="num"><b>'+f(x[2])+'</b></td><td class="num dim">'+f(x[3])+'</td></tr>';});
+ dh+='</tbody><tfoot><tr><td>Разом</td><td class="num">1 840</td><td class="num">1 840</td><td class="num">1 840</td></tr></tfoot>';
+ document.getElementById('t-deal').innerHTML=dh;
+})();
+})();
+</script>
+</body>
+</html>
