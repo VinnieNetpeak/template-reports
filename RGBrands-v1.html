@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Эталонный макет дашборда RG Brands: шесть дашбордов по ТЗ, логика каждой страницы и спецификация сетки, типографики и палитры для сборки в Power BI. Данные демонстрационные.">
+<meta name="robots" content="noindex">
+<title>Макет дашборда RG Brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* --- базовый сброс (в артефакте его добавляет платформа) --- */
+:root{color-scheme:light dark}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+:root{
+  --page:#EEF1EE; --page-ink:#1A1D1B; --page-body:#3D4642; --page-muted:#5F6A64;
+  --page-line:#D7DED9; --page-surface:#FFFFFF; --page-tint:#E7F1EB;
+  --canvas:#F4F6F4; --surface:#FFFFFF; --ink:#1A1D1B; --body:#414944; --muted:#6B756F;
+  --line:#E3E8E4; --line-strong:#CFD8D2;
+  --brand:#1E8B4F; --brand-dark:#156137; --brand-mid:#B9CFC2;
+  --pos:#1E8B4F; --neg:#C0392B; --warn:#C77700; --neutral:#C9CFCB;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#141815; --page-ink:#E9EFEB; --page-body:#C2CDC7; --page-muted:#8E9A94;
+  --page-line:#27312B; --page-surface:#1A211C; --page-tint:#1B2E23;}}
+:root[data-theme="dark"]{--page:#141815;--page-ink:#E9EFEB;--page-body:#C2CDC7;--page-muted:#8E9A94;
+  --page-line:#27312B;--page-surface:#1A211C;--page-tint:#1B2E23;}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--page-ink);
+  font-family:Barlow,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;
+  -webkit-font-smoothing:antialiased}
+.shell{padding-inline:16px;padding-block:22px 56px;max-width:2100px;margin:0 auto}
+
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.bar h1{font-size:17px;font-weight:600;margin:0 14px 0 0;letter-spacing:-.01em}
+.bar h1 em{font-style:normal;color:var(--page-muted);font-weight:500}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font:500 13px/1 Barlow,sans-serif;padding:9px 12px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--page-line);background:var(--page-surface);color:var(--page-ink);transition:.12s}
+.tabs button:hover{border-color:var(--brand)}
+.tabs button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.tabs button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.hint{margin:0 0 16px;font-size:13px;color:var(--page-muted);max-width:90ch}
+
+.stage{position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--page-line);background:var(--canvas)}
+.canvas{position:relative;width:2000px;transform-origin:0 0;background:var(--canvas);color:var(--body);
+  font-family:Barlow,sans-serif}
+.canvas *{box-sizing:border-box}
+.b{position:absolute}
+
+.band{position:absolute;left:0;top:0;width:2000px;height:96px;background:var(--brand)}
+.logo{position:absolute;left:40px;top:24px;display:flex;align-items:center;gap:12px;color:#fff}
+.logo .mark{width:46px;height:46px;border-radius:50%;background:#fff;position:relative;flex:0 0 auto}
+.logo .mark i{position:absolute;border-radius:50%;background:var(--brand)}
+.logo .mark i:nth-child(1){width:15px;height:15px;left:7px;top:8px}
+.logo .mark i:nth-child(2){width:15px;height:15px;left:24px;top:8px}
+.logo .mark i:nth-child(3){width:15px;height:15px;left:15px;top:23px}
+.logo b{font-size:23px;font-weight:700;letter-spacing:.04em;display:block;line-height:1.05}
+.logo span{font-size:10px;letter-spacing:.42em;opacity:.82;display:block}
+.nav{position:absolute;right:40px;top:28px;display:flex;gap:4px}
+.nav a{font-size:13px;font-weight:500;color:#DCEDE3;text-decoration:none;padding:9px 13px;border-radius:7px;
+  white-space:nowrap;line-height:1}
+.nav a.on{background:#fff;color:var(--brand-dark);font-weight:600}
+.fbar{position:absolute;left:0;top:96px;width:2000px;height:64px;background:var(--surface);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 40px;gap:12px}
+.stamp{font-size:12px;color:var(--muted)}
+.stamp b{color:var(--body);font-weight:500}
+.demo{font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--warn);
+  background:#FBF0DD;border:1px solid #EDD9B4;border-radius:5px;padding:5px 8px}
+.filters{margin-left:auto;display:flex;gap:16px}
+.fl{display:flex;flex-direction:column;gap:3px;width:200px}
+.fl label{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.fl .ctl{height:32px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);
+  display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px;color:var(--ink)}
+
+.sect{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ptitle{font-size:22px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;
+  height:100%;display:flex;flex-direction:column}
+.k-label{font-size:13px;color:var(--muted);font-weight:500;line-height:1.25}
+.k-val{font-size:32px;font-weight:600;color:var(--ink);line-height:1.1;margin-top:6px;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.k-val.lg{font-size:40px}
+.k-val.sm{font-size:28px}
+.k-val.none{color:var(--muted);font-weight:500;font-size:22px}
+.k-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:3px}
+.delta.up{color:var(--pos)} .delta.dn{color:var(--neg)}
+.hero{border-left:3px solid var(--brand)}
+.flag{font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;color:var(--warn);
+  border:1px solid #EDD9B4;background:#FBF0DD;border-radius:4px;padding:3px 5px;align-self:flex-start;margin-top:6px}
+
+.dir .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.dir .name{font-size:14px;font-weight:600;color:var(--ink)}
+.dir .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto;padding-top:14px;
+  border-top:1px solid var(--line)}
+.dir .mini div span{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.dir .mini div b{display:block;font-size:17px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.mx{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;height:100%}
+.mx table{width:100%;height:100%;border-collapse:collapse}
+.mx th,.mx td{padding:0 18px;text-align:right;font-variant-numeric:tabular-nums}
+.mx thead th{height:44px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;background:#F7F9F7;border-bottom:1px solid var(--line)}
+.mx thead th:first-child,.mx td:first-child{text-align:left}
+.mx tbody td{padding-top:14px;padding-bottom:14px;border-bottom:1px solid var(--line);
+  font-size:24px;font-weight:600;color:var(--ink)}
+.mx tbody tr:last-child td{border-bottom:0}
+.mx td:first-child{font-size:14px;font-weight:600;color:var(--ink)}
+.mx td:first-child em{display:block;font-style:normal;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.mx td u{display:block;text-decoration:none;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.mx td.none{color:var(--muted);font-weight:400}
+
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;height:100%;
+  display:flex;flex-direction:column}
+.tbl header{padding:16px 20px 12px;display:flex;align-items:baseline;gap:10px}
+.tbl header h4{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.tbl header .more{margin-left:auto;font-size:12px;font-weight:600;color:var(--brand);
+  border:1px solid var(--brand);border-radius:6px;padding:5px 10px;line-height:1}
+.tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:7px 20px;text-align:right;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);background:#F7F9F7}
+.tbl td{padding:9px 20px;text-align:right;border-bottom:1px solid var(--line);color:var(--body);
+  font-variant-numeric:tabular-nums}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl td b{color:var(--ink);font-weight:600}
+.tbl.roomy td{padding:15px 20px}
+.tbl .mono{font-family:"IBM Plex Mono",monospace;font-size:12px}
+.tbl .dim{color:var(--muted)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;height:100%;
+  display:flex;flex-direction:column;padding:16px 20px 14px}
+.panel h4{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.panel .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.panel .legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.panel .legend span{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.panel .legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.panel .plot{flex:1;margin-top:10px;min-height:0}
+
+.alerts{display:flex;flex-direction:column}
+.alert{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.alert:last-child{border-bottom:0}
+.alert .sev{width:3px;align-self:stretch;border-radius:2px;background:var(--neg);flex:0 0 auto}
+.alert .txt{flex:1;min-width:0}
+.alert .txt p{margin:0;font-size:13px;color:var(--ink);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.alert .txt small{display:block;margin-top:3px;font-size:11px;color:var(--muted)}
+.alert .rch{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.stack{display:flex;height:34px;border-radius:6px;overflow:hidden;margin-top:12px}
+.stack div{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.stackleg{display:flex;gap:16px;margin-top:9px;flex-wrap:wrap}
+.stackleg span{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.stackleg i{width:10px;height:10px;border-radius:2px}
+
+.why{background:var(--page-surface);border:1px solid var(--page-line);border-radius:12px;padding:26px 28px;margin-top:16px}
+.why .eyebrow{font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--page-muted);margin:0 0 12px}
+.why h2{font-size:20px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.why .who{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.why .who span{font-size:12.5px;color:var(--page-muted);background:var(--page-tint);border-radius:20px;padding:5px 12px}
+.why .who span b{color:var(--page-ink);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.cols h3{font-size:13px;font-weight:600;margin:0 0 9px;color:var(--page-ink)}
+.cols section+section{margin-top:24px}
+.cols p{margin:0;font-size:14.5px;line-height:1.62;color:var(--page-body);max-width:68ch}
+.cols p b{color:var(--page-ink);font-weight:600}
+.qs,.ds{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.qs li,.ds li{position:relative;padding-left:26px;font-size:14.5px;line-height:1.5;color:var(--page-body)}
+.qs li::before{content:"?";position:absolute;left:0;top:0;width:18px;height:18px;border-radius:4px;
+  background:var(--page-tint);color:var(--brand);font:600 11px/18px Barlow,sans-serif;text-align:center}
+.ds li::before{content:"→";position:absolute;left:0;top:0;width:18px;color:var(--brand);
+  font:600 13px/18px Barlow,sans-serif;text-align:center}
+.mets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.met{border:1px solid var(--page-line);border-radius:8px;padding:8px 12px;font-size:13px;
+  color:var(--page-muted);line-height:1.3}
+.met b{display:block;color:var(--page-ink);font-weight:600;font-size:14px}
+.met.main{border-color:var(--brand);background:var(--page-tint)}
+.met.main b{color:var(--brand-dark)}
+.note{margin-top:20px;padding:13px 16px;border-left:3px solid var(--warn);background:#FBF0DD33;border-radius:0 8px 8px 0}
+.note p{margin:0;font-size:13.5px;line-height:1.55;color:var(--page-body)}
+.note b{color:var(--page-ink)}
+
+.spec{background:var(--page-surface);border:1px solid var(--page-line);border-radius:12px;padding:26px 28px}
+.spec h2{font-size:20px;margin:0 0 4px;font-weight:600}
+.spec h3{font-size:14px;margin:28px 0 10px;font-weight:600}
+.spec h3:first-of-type{margin-top:20px}
+.spec p{margin:0;color:var(--page-muted);font-size:14px;max-width:82ch;line-height:1.6}
+.spec table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:8px}
+.spec th,.spec td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--page-line);vertical-align:top}
+.spec th{font:500 10.5px/1.4 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--page-muted)}
+.spec td.m{font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
+.spec tr:last-child td{border-bottom:0}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sw div{width:120px;border:1px solid var(--page-line);border-radius:7px;overflow:hidden}
+.sw i{display:block;height:40px}
+.sw span{display:block;padding:6px 8px;font:400 11px/1.45 "IBM Plex Mono",monospace;color:var(--page-muted)}
+.sw span b{display:block;color:var(--page-ink);font-weight:500}
+.spec ul{margin:8px 0 0;padding-left:0;list-style:none;display:grid;gap:7px}
+.spec li{position:relative;padding-left:22px;font-size:14px;color:var(--page-body);max-width:84ch;line-height:1.55}
+.spec li::before{content:"";position:absolute;left:4px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--brand)}
+.spec li b{color:var(--page-ink);font-weight:600}
+.tw{overflow-x:auto}
+@media (max-width:860px){.cols{grid-template-columns:1fr;gap:22px}.why,.spec{padding:18px 16px}.sw div{width:calc(50% - 4px)}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="bar">
+  <h1>Макет дашборда RG Brands <em>— шесть дашбордов по ТЗ</em></h1>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" aria-selected="true" data-p="ov1">Overview · плитки</button>
+    <button role="tab" aria-selected="false" data-p="ov2">Overview · матрица</button>
+    <button role="tab" aria-selected="false" data-p="smm">SMM</button>
+    <button role="tab" aria-selected="false" data-p="ig">SMM · Instagram</button>
+    <button role="tab" aria-selected="false" data-p="tt">SMM · TikTok</button>
+    <button role="tab" aria-selected="false" data-p="pr">PR</button>
+    <button role="tab" aria-selected="false" data-p="inf">Influence</button>
+    <button role="tab" aria-selected="false" data-p="ev">Events</button>
+    <button role="tab" aria-selected="false" data-p="btl">BTL</button>
+    <button role="tab" aria-selected="false" data-p="spec">Спецификация</button>
+  </div>
+</div>
+<p class="hint">Пять направлений — SMM, PR, Influence, Events, BTL — и сводная над ними. SMM разбит на сводную и две детальные страницы: у Instagram и TikTok разные механики и разный набор данных. Холст 2000 × 1125, координаты переносятся в Power BI один в один. Цифры демонстрационные.</p>
+
+<!-- ==================== OVERVIEW · ПЛИТКИ ==================== -->
+<div data-page="ov1">
+<div class="stage"><div class="canvas" data-h="1125" data-nav="Overview">
+  <div class="b" style="left:40px;top:192px;width:500px;height:24px"><span class="ptitle">Сводка по проекту</span></div>
+
+  <div class="b" style="left:40px;top:236px;width:462px;height:140px"><div class="card hero">
+    <span class="k-label">Охват — все инструменты</span><span class="k-val lg">954K</span>
+    <span class="flag">ФОРМУЛА СВЕДЕНИЯ НА СОГЛАСОВАНИИ</span></div></div>
+  <div class="b" style="left:526px;top:236px;width:462px;height:140px"><div class="card">
+    <span class="k-label">Упоминания бренда</span><span class="k-val lg">106</span>
+    <span class="k-sub"><span class="delta dn">▼ 8,2%</span> к прошлому месяцу</span></div></div>
+  <div class="b" style="left:1012px;top:236px;width:462px;height:140px"><div class="card">
+    <span class="k-label">Живые контакты</span><span class="k-val lg">27,0K</span>
+    <span class="k-sub">Events 18,4K + BTL 8,6K · выполнение плана 91,5%</span></div></div>
+  <div class="b" style="left:1498px;top:236px;width:462px;height:140px"><div class="card">
+    <span class="k-label">Бюджет проекта</span><span class="k-val lg">$945K</span>
+    <span class="k-sub">освоено 78% · остаток $208K</span></div></div>
+
+  <div class="b" style="left:40px;top:408px;width:500px;height:16px"><span class="sect">Пять направлений</span></div>
+
+  <div class="b" style="left:40px;top:436px;width:369px;height:244px"><div class="card dir">
+    <div class="top"><span class="name">SMM</span><span class="delta up">▲ 8,4%</span></div>
+    <span class="k-label" style="margin-top:12px">Охват</span><span class="k-val sm">954K</span>
+    <div class="plot" style="height:44px;margin-top:6px" data-chart="spark" data-values="644,676,692,711,734,780,790,836,846,895,913,954"></div>
+    <div class="mini"><div><span>ER</span><b>4,2%</b></div><div><span>Бюджет</span><b>$9,9K</b></div><div><span>CPC</span><b>$0,22</b></div></div>
+  </div></div>
+  <div class="b" style="left:433px;top:436px;width:369px;height:244px"><div class="card dir">
+    <div class="top"><span class="name">PR</span><span class="delta dn">▼ 2,2%</span></div>
+    <span class="k-label" style="margin-top:12px">Потенциальный охват</span><span class="k-val sm">21M</span>
+    <div class="stack" style="margin-top:8px;height:30px">
+      <div style="flex:37;background:#C0392B">37</div><div style="flex:30;background:#C9CFCB;color:#414944">30</div><div style="flex:39;background:#1E8B4F">39</div></div>
+    <div class="mini"><div><span>Упоминания</span><b>106</b></div><div><span>Взаимод.</span><b>269K</b></div><div><span>NSI</span><b>1,89</b></div></div>
+  </div></div>
+  <div class="b" style="left:826px;top:436px;width:369px;height:244px"><div class="card dir">
+    <div class="top"><span class="name">Influence</span><span class="delta dn">▼ 8,2%</span></div>
+    <span class="k-label" style="margin-top:12px">Охват размещений</span><span class="k-val sm">1,0M</span>
+    <div class="plot" style="height:44px;margin-top:6px" data-chart="spark" data-values="1.24,1.22,1.19,1.16,1.14,1.12,1.10,1.08,1.06,1.04,1.02,1.0"></div>
+    <div class="mini"><div><span>Блогеры</span><b>6</b></div><div><span>Бюджет</span><b>$6,3K</b></div><div><span>Ср. ER</span><b>1,38</b></div></div>
+  </div></div>
+  <div class="b" style="left:1219px;top:436px;width:369px;height:244px"><div class="card dir">
+    <div class="top"><span class="name">Events</span><span class="delta up">▲ 3,1%</span></div>
+    <span class="k-label" style="margin-top:12px">Посещаемость</span><span class="k-val sm">18,4K</span>
+    <div class="plot" style="height:44px;margin-top:6px" data-chart="spark" data-values="12.1,13.0,13.8,14.4,15.1,15.9,16.4,17.0,17.4,17.9,18.1,18.4"></div>
+    <div class="mini"><div><span>Меропр.</span><b>10</b></div><div><span>Выполн.</span><b>91,0%</b></div><div><span>CPC</span><b>$0,69</b></div></div>
+  </div></div>
+  <div class="b" style="left:1612px;top:436px;width:348px;height:244px"><div class="card dir">
+    <div class="top"><span class="name">BTL</span><span class="delta up">▲ 5,6%</span></div>
+    <span class="k-label" style="margin-top:12px">Контакты</span><span class="k-val sm">8,6K</span>
+    <div class="plot" style="height:44px;margin-top:6px" data-chart="spark" data-values="5.2,5.6,6.0,6.4,6.7,7.0,7.3,7.6,7.9,8.1,8.4,8.6"></div>
+    <div class="mini"><div><span>Активации</span><b>5</b></div><div><span>Точки</span><b>34</b></div><div><span>CPC</span><b>$0,64</b></div></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:712px;width:600px;height:16px"><span class="sect">Выполнение плана по живым контактам</span></div>
+  <div class="b" style="left:40px;top:740px;width:948px;height:345px"><div class="panel">
+    <h4>План и факт по проектам</h4><div class="sub">контакты, июнь 2026</div>
+    <div class="legend"><span><i style="background:#B9CFC2"></i>План</span><span><i style="background:#1E8B4F"></i>Факт</span></div>
+    <div class="plot" data-chart="planfact" data-rows='[["Digital Bridge Forum",10782,9666],["Expo Almaty",6667,6118],["Kaspi Tech Day",5749,5231],["Retail Event Astana",3418,2891],["BTL Activations Q2",3174,3088]]'></div>
+  </div></div>
+  <div class="b" style="left:1012px;top:740px;width:948px;height:345px"><div class="tbl roomy">
+    <header><h4>Проекты</h4><span class="more">Все проекты →</span></header>
+    <table>
+      <thead><tr><th>Проект</th><th>Направление</th><th>Бюджет</th><th>План</th><th>Факт</th><th>%</th></tr></thead>
+      <tbody>
+        <tr><td>Digital Bridge Forum 2026</td><td class="dim">Events</td><td>$268K</td><td>10 782</td><td><b>9 666</b></td><td>89,6</td></tr>
+        <tr><td>Expo Almaty Technology</td><td class="dim">Events</td><td>$196K</td><td>6 667</td><td><b>6 118</b></td><td>91,8</td></tr>
+        <tr><td>Kaspi Tech Day</td><td class="dim">Events</td><td>$172K</td><td>5 749</td><td><b>5 231</b></td><td>91,0</td></tr>
+        <tr><td>Retail Event Astana</td><td class="dim">BTL</td><td>$158K</td><td>3 418</td><td><b>2 891</b></td><td>84,6</td></tr>
+        <tr><td>BTL Activations Q2</td><td class="dim">BTL</td><td>$151K</td><td>3 174</td><td><b>3 088</b></td><td>97,3</td></tr>
+        <tr><td><b>Итого</b></td><td></td><td><b>$945K</b></td><td><b>29 790</b></td><td><b>26 994</b></td><td><b>91,5</b></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>Overview — плиточный вариант</h2>
+  <div class="who"><span>Задача: <b>понять, всё ли в порядке</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Сколько людей мы охватили за период и растёт ли это?</li>
+        <li>Сколько денег освоено и сколько осталось?</li>
+        <li>Какое из пяти направлений просело, а какое вытягивает?</li>
+        <li>Где мы отстаём от плана по живым контактам?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Перебросить бюджет между направлениями до конца квартала</li>
+        <li>Вызвать на разбор направление с падением два периода подряд</li>
+        <li>Согласовать перенос сроков по проекту с выполнением ниже 85%</li>
+        <li>Инициировать внеочередной разбор по PR при росте негатива</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>масштаб присутствия</span>
+          <span class="met main"><b>Бюджет</b>во сколько это обошлось</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Упоминания</b>чем набран охват</span>
+          <span class="met"><b>Живые контакты</b>офлайн-часть</span>
+          <span class="met"><b>ER</b>насколько живо</span>
+          <span class="met"><b>CPC</b>насколько дёшево</span>
+          <span class="met"><b>Выполнение плана</b>держим ли обещания</span>
+        </div>
+        <p>Главных величин две: <b>охват</b> — скольких людей мы достали, <b>бюджет</b> — во сколько это обошлось. Остальные метрики не самостоятельны: они объясняют, почему эти две цифры такие. Метрик исполнителя — CTR, частоты, показов по типам контента — здесь нет: на уровне руководства они не приводят ни к какому решению.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>Охват сведён предварительно.</b> 954K — сумма Instagram и TikTok, то есть двойной счёт по пересечению аудиторий; PR и Influence в неё не входят. Формула сведения общего охвата по разным инструментам обсуждается — до решения карточка несёт пометку прямо на экране.</p></div>
+</div>
+</div>
+
+<!-- ==================== OVERVIEW · МАТРИЦА ==================== -->
+<div data-page="ov2" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="Overview">
+  <div class="b" style="left:40px;top:192px;width:800px;height:24px"><span class="ptitle">Пять направлений на одном листе</span></div>
+
+  <div class="b" style="left:40px;top:236px;width:1272px;height:849px"><div class="mx">
+    <table>
+      <thead><tr><th>Направление</th><th>Охват</th><th>Вовлечение</th><th>Бюджет</th><th>Стоимость контакта</th></tr></thead>
+      <tbody>
+        <tr><td>SMM<em>Instagram + TikTok</em></td><td>954K<u>формула на согласовании</u></td><td>4,2%<u>средний ER</u></td><td>$9,9K<u>▼ 2,4%</u></td><td>$0,22<u>CPC</u></td></tr>
+        <tr><td>PR<em>SemanticForce</em></td><td>21M<u>потенциальный</u></td><td>269K<u>взаимодействия</u></td><td class="none">—<u>нет источника</u></td><td class="none">—<u>нет источника</u></td></tr>
+        <tr><td>Influence<em>6 блогеров</em></td><td>1,0M<u>▼ 8,2%</u></td><td>1,38<u>средний ER</u></td><td>$6,3K<u>▼ 24,6%</u></td><td>$0,30<u>считается как CPM</u></td></tr>
+        <tr><td>Events<em>10 мероприятий</em></td><td>18,4K<u>живые контакты</u></td><td>91,0%<u>выполнение плана</u></td><td>$634K<u>освоено 81%</u></td><td>$0,69<u>за контакт</u></td></tr>
+        <tr><td>BTL<em>5 активаций, 34 точки</em></td><td>8,6K<u>живые контакты</u></td><td>92,4%<u>выполнение плана</u></td><td>$311K<u>освоено 74%</u></td><td>$0,64<u>за контакт</u></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:236px;width:624px;height:412px"><div class="panel">
+    <h4>Динамика охвата в соцсетях</h4><div class="sub">июнь 2026, по дням</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Instagram</span><span><i style="background:#4A6FA5"></i>TikTok</span></div>
+    <div class="plot" data-chart="lines" data-a="242,258,251,274,266,291,286,305,298,318,312,330"
+      data-b="402,418,441,437,468,489,504,531,548,577,601,624"
+      data-labels="01.06,04.06,07.06,10.06,13.06,16.06,19.06,22.06,25.06,27.06,29.06,30.06"></div>
+  </div></div>
+  <div class="b" style="left:1336px;top:673px;width:624px;height:412px"><div class="panel">
+    <h4>Стоимость контакта по направлениям</h4><div class="sub">чем короче полоса, тем дешевле контакт</div>
+    <div class="plot" data-chart="sources" data-scale="0.01" data-dec="2" data-prefix="$"
+      data-rows='[["SMM",22],["Influence",30],["BTL",64],["Events",69]]'></div>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>Overview — матричный вариант</h2>
+  <div class="who"><span>Задача: <b>сравнить направления между собой</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Какое направление даёт контакт дешевле остальных?</li>
+        <li>Где вовлечение не соответствует вложенным деньгам?</li>
+        <li>По каким направлениям мы вообще не умеем считать эффективность?</li>
+        <li>Куда двигается охват в соцсетях?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Перераспределить квартальный бюджет в пользу направления с лучшей стоимостью контакта</li>
+        <li>Поставить задачу закрыть пробел в данных там, где стоит прочерк</li>
+        <li>Утвердить или отклонить смету следующего периода по направлению</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>сколько людей</span>
+          <span class="met main"><b>Стоимость контакта</b>почём каждый</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Вовлечение</b>оправдана ли цена</span>
+          <span class="met"><b>Бюджет</b>масштаб вложения</span>
+        </div>
+        <p>Главные колонки — <b>охват</b> и <b>стоимость контакта</b>: только по ним направления сравнимы между собой, несмотря на разную природу. Вовлечение и бюджет поддерживают вывод: дорогой контакт оправдан, если отклик выше среднего, и не оправдан, если нет. Прочерки оставлены на виду — они показывают, где направление пока не считается.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SMM ==================== -->
+<div data-page="smm" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="SMM">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">SMM — Instagram и TikTok</span></div>
+
+  <div class="b" style="left:40px;top:236px;width:1920px;height:118px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:24px;height:100%">
+      <div class="card hero"><span class="k-label">Охват SMM</span><span class="k-val sm">954K</span><span class="flag">ФОРМУЛА НА СОГЛАСОВАНИИ</span></div>
+      <div class="card"><span class="k-label">Показы</span><span class="k-val sm">1,42M</span><span class="k-sub"><span class="delta dn">▼ 9,4%</span></span></div>
+      <div class="card"><span class="k-label">Средний ER</span><span class="k-val sm">4,2%</span><span class="k-sub"><span class="delta up">▲ 0,6 п.п.</span></span></div>
+      <div class="card"><span class="k-label">Расход</span><span class="k-val sm">$9,9K</span><span class="k-sub"><span class="delta dn">▼ 2,4%</span></span></div>
+      <div class="card"><span class="k-label">Доля органики в охвате</span><span class="k-val sm">61%</span><span class="k-sub"><span class="delta dn">▼ 4 п.п.</span></span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:382px;width:948px;height:400px"><div class="panel">
+    <h4>Динамика охвата по каналам</h4><div class="sub">июнь 2026, по дням</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Instagram</span><span><i style="background:#4A6FA5"></i>TikTok</span></div>
+    <div class="plot" data-chart="lines" data-a="242,258,251,274,266,291,286,305,298,318,312,330"
+      data-b="402,418,441,437,468,489,504,531,548,577,601,624"
+      data-labels="01.06,04.06,07.06,10.06,13.06,16.06,19.06,22.06,25.06,27.06,29.06,30.06"></div>
+  </div></div>
+
+  <div class="b" style="left:1012px;top:382px;width:948px;height:400px"><div class="panel">
+    <h4>Органика и платное в охвате</h4><div class="sub">тысяч человек, сравнение каналов по источнику охвата</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Органика</span><span><i style="background:#B9CFC2"></i>Платное</span></div>
+    <div class="plot" data-chart="grouped" data-fmt="k"
+      data-series='[["Органика","#1E8B4F"],["Платное","#B9CFC2"]]'
+      data-rows='[["Instagram",198,132],["TikTok",384,240]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:806px;width:1920px;height:239px"><div class="tbl roomy">
+    <header><h4>Сравнение каналов</h4><span class="more">Детали по каналу →</span></header>
+    <table>
+      <thead><tr><th>Канал</th><th>Охват</th><th>Показы</th><th>ER</th><th>Подписчики</th><th>Прирост</th><th>Расход</th><th>CPC</th><th>Доля органики</th></tr></thead>
+      <tbody>
+        <tr><td>Instagram</td><td><b>330 000</b></td><td>920 000</td><td>2,44%</td><td>181 000</td><td>+1,9%</td><td>$3 940</td><td>$0,15</td><td>60%</td></tr>
+        <tr><td>TikTok</td><td><b>624 000</b></td><td>498 000</td><td>7,37%</td><td>96 400</td><td>+4,8%</td><td>$5 960</td><td>$0,28</td><td>62%</td></tr>
+        <tr><td><b>Итого</b></td><td><b>954 000</b></td><td><b>1 418 000</b></td><td><b>4,2%</b></td><td><b>277 400</b></td><td><b>+2,9%</b></td><td><b>$9 900</b></td><td><b>$0,22</b></td><td><b>61%</b></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>SMM — сводная по каналам</h2>
+  <div class="who"><span>Задача: <b>решить, куда идёт бюджет следующего месяца</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Instagram или TikTok растёт быстрее и за счёт чего?</li>
+        <li>Охват тянет контент или деньги?</li>
+        <li>Где контакт дешевле?</li>
+        <li>Какой канал добавит аудитории, если увеличить бюджет?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Перенести часть бюджета между Instagram и TikTok</li>
+        <li>Усилить производство контента под канал с лучшим ER</li>
+        <li>Поднять тревогу, если доля органики падает третий месяц</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>масштаб канала</span>
+          <span class="met main"><b>ER</b>живость аудитории</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Доля органики</b>устойчивость роста</span>
+          <span class="met"><b>Расход</b>цена роста</span>
+          <span class="met"><b>CPC</b>эффективность закупки</span>
+          <span class="met"><b>Показы</b>частота касаний</span>
+        </div>
+        <p>Главные — <b>охват</b> и <b>ER</b>: первый показывает масштаб, второй — живость аудитории, вместе они отвечают на вопрос «растём ли мы по-настоящему». Расход и CPC объясняют, куплен рост или заработан. <b>Доля органики</b> — ключ к устойчивости: если охват держится только на платном, при остановке бюджета он обнулится, и это видно заранее.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SMM · INSTAGRAM ==================== -->
+<div data-page="ig" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="Instagram">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">Instagram</span></div>
+  <div class="b" style="left:40px;top:230px;width:600px;height:16px"><span class="sect">Органика — управляется контентом</span></div>
+  <div class="b" style="left:40px;top:256px;width:1920px;height:112px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Охват</span><span class="k-val">330K</span><span class="k-sub"><span class="delta up">▲ 4,1%</span></span></div>
+      <div class="card"><span class="k-label">Показы</span><span class="k-val">362K</span><span class="k-sub"><span class="delta dn">▼ 14,2%</span></span></div>
+      <div class="card"><span class="k-label">Лайки</span><span class="k-val">12K</span><span class="k-sub"><span class="delta dn">▼ 6,5%</span></span></div>
+      <div class="card"><span class="k-label">Комментарии</span><span class="k-val">989</span><span class="k-sub"><span class="delta up">▲ 25,8%</span></span></div>
+      <div class="card"><span class="k-label">Сохранения</span><span class="k-val">2,0K</span><span class="k-sub"><span class="delta up">▲ 8,0%</span></span></div>
+      <div class="card"><span class="k-label">ER</span><span class="k-val">2,44%</span><span class="k-sub"><span class="delta dn">▼ 1,1 п.п.</span></span></div>
+    </div>
+  </div>
+  <div class="b" style="left:40px;top:388px;width:600px;height:16px"><span class="sect">Платное — управляется бюджетом</span></div>
+  <div class="b" style="left:40px;top:414px;width:1920px;height:112px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Показы</span><span class="k-val">558K</span><span class="k-sub"><span class="delta dn">▼ 18,1%</span></span></div>
+      <div class="card"><span class="k-label">Клики</span><span class="k-val">26K</span><span class="k-sub"><span class="delta up">▲ 25,8%</span></span></div>
+      <div class="card"><span class="k-label">Расход</span><span class="k-val">$3,9K</span><span class="k-sub"><span class="delta dn">▼ 7,7%</span></span></div>
+      <div class="card"><span class="k-label">CTR</span><span class="k-val">2,72%</span><span class="k-sub"><span class="delta dn">▼ 22,2%</span></span></div>
+      <div class="card"><span class="k-label">CPC</span><span class="k-val">$0,15</span><span class="k-sub"><span class="delta dn">▼ 6,7%</span></span></div>
+      <div class="card"><span class="k-label">Подписчики</span><span class="k-val">181K</span><span class="k-sub"><span class="delta up">▲ 1,9%</span></span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:558px;width:1272px;height:325px"><div class="panel">
+    <h4>Охват и показы по дням</h4><div class="sub">органика и платное вместе</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Охват</span><span><i style="background:#4A6FA5"></i>Показы</span></div>
+    <div class="plot" data-chart="lines" data-a="242,258,251,274,266,291,286,305,298,318,312,330"
+      data-b="288,312,301,334,322,356,349,378,366,392,384,362"
+      data-labels="01.06,04.06,07.06,10.06,13.06,16.06,19.06,22.06,25.06,27.06,29.06,30.06"></div>
+  </div></div>
+  <div class="b" style="left:1336px;top:558px;width:624px;height:325px"><div class="panel">
+    <h4>Аудитория</h4><div class="sub">доля подписчиков</div>
+    <div class="plot" data-chart="demo"
+      data-groups='[["Пол",[["Женщины",54.5],["Мужчины",45.2],["Другое",0.3]]],["Возраст",[["18–24",46.1],["25–34",43.3],["35–44",10.2],["45+",0.4]]]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:901px;width:1272px;height:184px"><div class="tbl">
+    <header><h4>Лучший контент месяца</h4><span class="more">Все публикации →</span></header>
+    <table>
+      <thead><tr><th>Публикация</th><th>Тип</th><th>Охват</th><th>Лайки</th><th>Комм.</th><th>ER</th></tr></thead>
+      <tbody>
+        <tr><td>Летняя серия Piala — запуск вкуса</td><td>Reels</td><td><b>64 820</b></td><td>3 104</td><td>218</td><td>5,12%</td></tr>
+        <tr><td>ASU × фестиваль в Алматы</td><td>Пост</td><td><b>51 340</b></td><td>2 246</td><td>164</td><td>4,70%</td></tr>
+        <tr><td>Da Da — утро начинается с…</td><td>Сторис</td><td><b>38 915</b></td><td>1 502</td><td>96</td><td>4,11%</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+  <div class="b" style="left:1336px;top:901px;width:624px;height:184px"><div class="tbl">
+    <header><h4>География</h4><span class="more">Все города →</span></header>
+    <table>
+      <thead><tr><th>Город</th><th>Подписчики</th><th>Доля</th></tr></thead>
+      <tbody>
+        <tr><td>Алматы</td><td><b>78 284</b></td><td>43,2%</td></tr>
+        <tr><td>Астана</td><td><b>47 559</b></td><td>26,3%</td></tr>
+        <tr><td>Караганда</td><td><b>30 198</b></td><td>16,7%</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>SMM · Instagram</h2>
+  <div class="who"><span>Задача: <b>найти, что поправить на следующей неделе</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Мы растём органикой или держимся только на платном?</li>
+        <li>Какой формат контента сработал в этом месяце?</li>
+        <li>Не дорожает ли клик и не падает ли CTR?</li>
+        <li>Меняется ли аудитория — возраст, пол, города?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Усилить формат, который дал ER выше среднего по месяцу</li>
+        <li>Снять открутку с кампании, где CPC растёт третью неделю</li>
+        <li>Сместить таргетинг на возрастную группу с лучшим откликом</li>
+        <li>Поставить съёмку под город, где аудитория растёт быстрее</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>сколько людей увидели</span>
+          <span class="met main"><b>ER</b>сколько отреагировали</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Сохранения</b>дорогое действие, честный сигнал</span>
+          <span class="met"><b>Комментарии</b>вовлечённость, а не скролл</span>
+          <span class="met"><b>CTR и CPC</b>качество закупки</span>
+          <span class="met"><b>Подписчики</b>результат рекламы для бренда</span>
+        </div>
+        <p>Главные — <b>охват</b> и <b>ER</b>. Остальное разложено на две воронки: органика показывает, как контент превращает просмотр в реакцию, платное — как деньги превращаются в клик и подписчика. Разделение нужно ради причинности: по падению охвата сразу видно, слабый это контент или снятый бюджет.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== SMM · TIKTOK ==================== -->
+<div data-page="tt" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="TikTok">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">TikTok</span></div>
+  <div class="b" style="left:40px;top:230px;width:600px;height:16px"><span class="sect">Органика — управляется контентом</span></div>
+  <div class="b" style="left:40px;top:256px;width:1920px;height:112px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Охват</span><span class="k-val">624K</span><span class="k-sub"><span class="delta up">▲ 11,6%</span></span></div>
+      <div class="card"><span class="k-label">Просмотры</span><span class="k-val">498K</span><span class="k-sub"><span class="delta up">▲ 9,2%</span></span></div>
+      <div class="card"><span class="k-label">Досматриваемость</span><span class="k-val">38,4%</span><span class="k-sub"><span class="delta up">▲ 3,1 п.п.</span></span></div>
+      <div class="card"><span class="k-label">Ср. время просмотра</span><span class="k-val">11,2с</span><span class="k-sub"><span class="delta up">▲ 0,8с</span></span></div>
+      <div class="card"><span class="k-label">Репосты</span><span class="k-val">4,1K</span><span class="k-sub"><span class="delta up">▲ 18,4%</span></span></div>
+      <div class="card"><span class="k-label">ER</span><span class="k-val">7,37%</span><span class="k-sub"><span class="delta up">▲ 0,9 п.п.</span></span></div>
+    </div>
+  </div>
+  <div class="b" style="left:40px;top:388px;width:600px;height:16px"><span class="sect">Платное — управляется бюджетом</span></div>
+  <div class="b" style="left:40px;top:414px;width:1920px;height:112px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Показы</span><span class="k-val">240K</span><span class="k-sub"><span class="delta up">▲ 6,4%</span></span></div>
+      <div class="card"><span class="k-label">Клики</span><span class="k-val">21K</span><span class="k-sub"><span class="delta up">▲ 12,1%</span></span></div>
+      <div class="card"><span class="k-label">Расход</span><span class="k-val">$6,0K</span><span class="k-sub"><span class="delta up">▲ 3,2%</span></span></div>
+      <div class="card"><span class="k-label">CTR</span><span class="k-val">8,75%</span><span class="k-sub"><span class="delta up">▲ 1,4 п.п.</span></span></div>
+      <div class="card"><span class="k-label">CPC</span><span class="k-val">$0,28</span><span class="k-sub"><span class="delta dn">▼ 8,0%</span></span></div>
+      <div class="card"><span class="k-label">Подписчики</span><span class="k-val">96,4K</span><span class="k-sub"><span class="delta up">▲ 4,8%</span></span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:558px;width:1272px;height:325px"><div class="panel">
+    <h4>Охват и досматриваемость по дням</h4><div class="sub">чем выше досмотр, тем дешевле следующий охват</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Охват</span><span><i style="background:#4A6FA5"></i>Досматриваемость, %</span></div>
+    <div class="plot" data-chart="lines" data-scale-b="10"
+      data-a="402,418,441,437,468,489,504,531,548,577,601,624"
+      data-b="310,322,338,331,349,356,364,371,376,381,382,384"
+      data-labels="01.06,04.06,07.06,10.06,13.06,16.06,19.06,22.06,25.06,27.06,29.06,30.06"></div>
+  </div></div>
+  <div class="b" style="left:1336px;top:558px;width:624px;height:325px"><div class="panel">
+    <h4>Аудитория</h4><div class="sub">доля подписчиков</div>
+    <div class="plot" data-chart="demo"
+      data-groups='[["Возраст",[["18–24",41.8],["25–34",34.6],["35–44",18.9],["45+",4.7]]],["Страна",[["Казахстан",82.4],["Узбекистан",9.1],["Кыргызстан",5.3],["Другие",3.2]]]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:901px;width:1272px;height:184px"><div class="tbl">
+    <header><h4>Лучшие ролики месяца</h4><span class="more">Все ролики →</span></header>
+    <table>
+      <thead><tr><th>Ролик</th><th>Просмотры</th><th>Досмотр</th><th>Репосты</th><th>Комм.</th><th>ER</th></tr></thead>
+      <tbody>
+        <tr><td>Salam Cola — челлендж с открыванием</td><td><b>128 400</b></td><td>52,1%</td><td>1 840</td><td>612</td><td>11,4%</td></tr>
+        <tr><td>ASU — как это делают на заводе</td><td><b>96 210</b></td><td>44,7%</td><td>1 102</td><td>388</td><td>8,9%</td></tr>
+        <tr><td>Piala — рецепт за 15 секунд</td><td><b>71 560</b></td><td>39,2%</td><td>702</td><td>241</td><td>7,1%</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+  <div class="b" style="left:1336px;top:901px;width:624px;height:184px"><div class="tbl">
+    <header><h4>География</h4></header>
+    <table>
+      <thead><tr><th>Страна</th><th>Подписчики</th><th>Доля</th></tr></thead>
+      <tbody>
+        <tr><td>Казахстан</td><td><b>79 434</b></td><td>82,4%</td></tr>
+        <tr><td>Узбекистан</td><td><b>8 772</b></td><td>9,1%</td></tr>
+        <tr><td class="dim">Городов нет — ограничение TikTok API</td><td class="dim">—</td><td class="dim">—</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>SMM · TikTok</h2>
+  <div class="who"><span>Задача: <b>понять, какие ролики работают, и повторить</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Досматривают ли ролики до конца?</li>
+        <li>Какие темы дают репосты, а какие только просмотры?</li>
+        <li>Растёт ли база подписчиков и за чей счёт?</li>
+        <li>Не дорожает ли платный охват?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Переснять формат с досматриваемостью ниже 35%</li>
+        <li>Поставить в план темы, дающие репосты</li>
+        <li>Сместить бюджет на возрастную группу с лучшим откликом</li>
+        <li>Перенести удачный органический ролик в платное продвижение</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>масштаб</span>
+          <span class="met main"><b>Досматриваемость</b>сработал ли ролик</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Репосты</b>органическое распространение</span>
+          <span class="met"><b>Ср. время просмотра</b>глубина внимания</span>
+          <span class="met"><b>ER</b>общая реакция</span>
+          <span class="met"><b>CPC</b>цена платного охвата</span>
+        </div>
+        <p>У TikTok главная пара другая, чем у Instagram: <b>охват</b> и <b>досматриваемость</b>. Лайк здесь дёшев и мало о чём говорит, а досмотр до конца — честный сигнал, что ролик сработал, и именно он разгоняет следующий охват. Репосты и среднее время просмотра поддерживают вывод и подсказывают, какую тему повторить.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>География только по странам.</b> TikTok API не отдаёт разбивку по городам — это ограничение платформы, а не решение макета, поэтому гео у Instagram и TikTok будет выглядеть по-разному.</p></div>
+</div>
+</div>
+
+<!-- ==================== PR ==================== -->
+<div data-page="pr" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="PR">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">PR и медиаполе</span></div>
+  <div class="b" style="left:40px;top:236px;width:1920px;height:112px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Упоминания</span><span class="k-val">106</span><span class="k-sub"><span class="delta dn">▼ 8,2%</span></span></div>
+      <div class="card hero"><span class="k-label">Индекс тональности (NSI)</span><span class="k-val">1,89</span><span class="k-sub">позитив минус негатив, нормировано</span></div>
+      <div class="card"><span class="k-label">Потенциальный охват</span><span class="k-val">21M</span><span class="k-sub"><span class="delta up">▲ 12,4%</span></span></div>
+      <div class="card"><span class="k-label">Взаимодействия</span><span class="k-val">269K</span><span class="k-sub"><span class="delta dn">▼ 22,2%</span></span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:376px;width:1272px;height:330px"><div class="panel">
+    <h4>Упоминания по тональности</h4><div class="sub">по неделям — сравнение тональностей между собой</div>
+    <div class="legend"><span><i style="background:#C0392B"></i>Негатив</span><span><i style="background:#C9CFCB"></i>Нейтрал</span><span><i style="background:#1E8B4F"></i>Позитив</span></div>
+    <div class="plot" data-chart="grouped"
+      data-series='[["Негатив","#C0392B"],["Нейтрал","#C9CFCB"],["Позитив","#1E8B4F"]]'
+      data-rows='[["нед. 22",6,8,11],["нед. 23",9,7,8],["нед. 24",7,6,9],["нед. 25",11,5,6],["нед. 26",4,4,5]]'></div>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:376px;width:624px;height:330px"><div class="panel">
+    <h4>Требуют реакции</h4><div class="sub">негатив с охватом выше 50K за последние 7 дней</div>
+    <div class="plot" style="overflow:hidden"><div class="alerts">
+      <div class="alert"><i class="sev"></i><div class="txt">
+        <p>«Покупатели жалуются на качество партии — в сети распространяется видео из магазина в Алматы»</p>
+        <small>Tengrinews · 16.09, 11:20</small></div><span class="rch">312K</span></div>
+      <div class="alert"><i class="sev"></i><div class="txt">
+        <p>«Обсуждение цен на продукцию в Telegram-канале с аудиторией 180 тысяч»</p>
+        <small>Telegram · 16.09, 09:05</small></div><span class="rch">180K</span></div>
+      <div class="alert"><i class="sev"></i><div class="txt">
+        <p>«Пост с претензией к упаковке набрал более двух тысяч комментариев»</p>
+        <small>Instagram · 15.09, 18:44</small></div><span class="rch">96K</span></div>
+      <div class="alert"><i class="sev"></i><div class="txt">
+        <p>«Материал о проверке производства вышел на региональном портале»</p>
+        <small>Zakon.kz · 15.09, 14:10</small></div><span class="rch">74K</span></div>
+    </div></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:730px;width:1272px;height:355px"><div class="panel">
+    <h4>Топ-10 источников по охвату</h4><div class="sub">остальные источники — в отчёте «Упоминания»</div>
+    <div class="plot" data-chart="sources"
+      data-rows='[["Instagram",6420],["Telegram",4180],["Tengrinews",3240],["Zakon.kz",2110],["NUR.KZ",1740],["Vlast.kz",1120],["Informburo",860],["Facebook",640],["Threads",420],["YouTube",310]]'></div>
+  </div></div>
+  <div class="b" style="left:1336px;top:730px;width:624px;height:355px"><div class="tbl">
+    <header><h4>Последние упоминания</h4><span class="more">Все 106 →</span></header>
+    <table>
+      <thead><tr><th>Источник</th><th>Дата</th><th>Охват</th><th>Тон</th></tr></thead>
+      <tbody>
+        <tr><td>Tengrinews</td><td class="mono">16.09</td><td><b>312K</b></td><td style="color:#C0392B">Негатив</td></tr>
+        <tr><td>Telegram</td><td class="mono">16.09</td><td><b>180K</b></td><td style="color:#C0392B">Негатив</td></tr>
+        <tr><td>Instagram</td><td class="mono">15.09</td><td><b>96K</b></td><td style="color:#6B756F">Нейтрал</td></tr>
+        <tr><td>Zakon.kz</td><td class="mono">15.09</td><td><b>74K</b></td><td style="color:#C0392B">Негатив</td></tr>
+        <tr><td>Vlast.kz</td><td class="mono">14.09</td><td><b>58K</b></td><td style="color:#1E8B4F">Позитив</td></tr>
+        <tr><td>NUR.KZ</td><td class="mono">14.09</td><td><b>41K</b></td><td style="color:#1E8B4F">Позитив</td></tr>
+        <tr><td>Informburo</td><td class="mono">13.09</td><td><b>33K</b></td><td style="color:#6B756F">Нейтрал</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>PR и медиаполе</h2>
+  <div class="who"><span>Задача: <b>увидеть, на что реагировать сегодня</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Сколько о нас говорят и растёт ли это?</li>
+        <li>Чего стало больше за неделю — негатива или позитива?</li>
+        <li>Есть ли прямо сейчас упоминание, на которое надо отвечать?</li>
+        <li>Через какие площадки идёт основной охват?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Выпустить комментарий или опровержение по конкретному материалу</li>
+        <li>Связаться с площадкой, дающей повторяющийся негатив</li>
+        <li>Поднять или опустить порог алерта</li>
+        <li>Перераспределить усилия на площадку, дающую охват дешевле</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Упоминания</b>сколько о нас говорят</span>
+          <span class="met main"><b>Тональность (NSI)</b>как о нас говорят</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Потенциальный охват</b>вес разговора</span>
+          <span class="met"><b>Взаимодействия</b>реальный отклик</span>
+          <span class="met"><b>Источники</b>где набирается вес</span>
+        </div>
+        <p>Главные — <b>объём упоминаний</b> и <b>тональность</b>: вместе они отвечают на вопрос «много ли о нас говорят и как». Охват и взаимодействия задают вес: сто упоминаний в мелких пабликах и десять в Tengrinews — разные ситуации. Столбики сгруппированы, а не сложены, потому что вопрос здесь «чего больше», а не «сколько всего»: на 25-й неделе видно, что негатив впервые перерос позитив.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>Счётчик упоминаний пока завышен.</b> Фильтр минус-слов (вакансия, работа, hiring — ТЗ п. 3) настраивается на стороне SemanticForce и не реализован, поэтому в 106 упоминаний входят вакансии. Это критерий приёмки.</p></div>
+</div>
+</div>
+
+<!-- ==================== INFLUENCE ==================== -->
+<div data-page="inf" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="Influence">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">Инфлюенс-маркетинг</span></div>
+  <div class="b" style="left:40px;top:236px;width:1920px;height:118px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:24px;height:100%">
+      <div class="card"><span class="k-label">Охват</span><span class="k-val sm">1,0M</span><span class="k-sub"><span class="delta dn">▼ 8,2%</span></span></div>
+      <div class="card"><span class="k-label">Средний ER</span><span class="k-val sm">1,38</span><span class="k-sub"><span class="delta up">▲ 0,2%</span></span></div>
+      <div class="card"><span class="k-label">Блогеры</span><span class="k-val sm">6</span><span class="k-sub">активных в периоде</span></div>
+      <div class="card"><span class="k-label">Бюджет</span><span class="k-val sm">$6,3K</span><span class="k-sub"><span class="delta dn">▼ 24,6%</span></span></div>
+      <div class="card"><span class="k-label">CPC</span><span class="k-val sm">$0,30</span><span class="flag">СЧИТАЕТСЯ КАК CPM</span></div>
+      <div class="card"><span class="k-label">Взаимодействия</span><span class="k-val sm">103K</span><span class="k-sub"><span class="delta dn">▼ 22,2%</span></span></div>
+      <div class="card"><span class="k-label">Индекс тональности</span><span class="k-val sm">10,5</span><span class="k-sub"><span class="delta dn">▼ 2,2%</span></span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:382px;width:1272px;height:414px"><div class="panel">
+    <h4>Эффективность блогеров</h4><div class="sub">охват размещений и вовлечённость аудитории — две дорожки, одна сортировка</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Охват</span><span><i style="background:#C77700"></i>ER, %</span></div>
+    <div class="plot" data-chart="bloggers"
+      data-rows='[["@almaty_life_style",650,8.0],["@kaz_trend_official",560,9.0],["@kaz_travel_guide",70,13.0],["@astana_tech_reviews",40,13.7],["@smak_kz_nano",20,23.6],["@almaty_food_nano",10,17.4]]'></div>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:382px;width:624px;height:414px"><div class="panel">
+    <h4>Тональность размещений</h4><div class="sub">доля от суммарного охвата</div>
+    <div class="stack" style="height:40px">
+      <div style="flex:51;background:#C0392B">51%</div><div style="flex:29;background:#C9CFCB;color:#414944">29%</div><div style="flex:20;background:#1E8B4F">20%</div></div>
+    <div class="stackleg"><span><i style="background:#C0392B"></i>Негатив 685K</span><span><i style="background:#C9CFCB"></i>Нейтрал 384K</span><span><i style="background:#1E8B4F"></i>Позитив 274K</span></div>
+    <h4 style="margin-top:20px;font-size:13px">Стоимость контакта по блогерам</h4>
+    <div class="sub">чем короче полоса, тем дешевле контакт</div>
+    <div class="plot" style="margin-top:6px" data-chart="sources" data-scale="0.01" data-dec="2" data-prefix="$"
+      data-rows='[["@almaty_life_style",18],["@kaz_trend_official",21],["@kaz_travel_guide",34],["@astana_tech_reviews",39],["@smak_kz_nano",52],["@almaty_food_nano",61]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:820px;width:1920px;height:265px"><div class="tbl roomy">
+    <header><h4>Кампании</h4><span class="more">Карточка блогера →</span></header>
+    <table>
+      <thead><tr><th>Кампания</th><th>Период</th><th>Блогеры</th><th>Бюджет</th><th>Охват</th><th>ER</th><th>Выполнение</th></tr></thead>
+      <tbody>
+        <tr><td>Brand Awareness Almaty</td><td class="mono">2026-Q3</td><td>4 / 5</td><td>$2 460</td><td><b>1 259 000</b></td><td>4,94</td><td>96%</td></tr>
+        <tr><td>Piala Summer Push</td><td class="mono">2026-Q3</td><td>3 / 3</td><td>$1 880</td><td><b>846 200</b></td><td>3,71</td><td>100%</td></tr>
+        <tr><td>ASU Taste Test</td><td class="mono">2026-Q2</td><td>2 / 4</td><td>$1 120</td><td><b>412 500</b></td><td>2,88</td><td>62%</td></tr>
+        <tr><td>Da Da Morning Ritual</td><td class="mono">2026-Q2</td><td>3 / 3</td><td>$800</td><td><b>298 400</b></td><td>5,10</td><td>100%</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>Инфлюенс-маркетинг</h2>
+  <div class="who"><span>Задача: <b>решить, с кем работать дальше</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Кто даёт охват, а кто — вовлечение? Это одни и те же блогеры?</li>
+        <li>Сколько стоит один контакт и растёт ли цена?</li>
+        <li>Какие кампании идут по плану, а какие встали?</li>
+        <li>Не уходит ли тональность размещений в минус?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Сместить бюджет в нано-сегмент, если ER там кратно выше</li>
+        <li>Не продлевать блогера с большим охватом и низким откликом</li>
+        <li>Допланировать кампанию с выполнением 62%</li>
+        <li>Утвердить состав пула на следующий квартал</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Охват</b>сколько людей увидели</span>
+          <span class="met main"><b>ER</b>насколько поверили</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Блогеры</b>на скольких размазан бюджет</span>
+          <span class="met"><b>Бюджет и CPC</b>какой ценой получен охват</span>
+          <span class="met"><b>Тональность</b>работает ли охват на бренд</span>
+        </div>
+        <p>Главная пара — <b>охват</b> и <b>ER</b>, и весь смысл страницы в том, что они расходятся: лидер по охвату почти никогда не лидер по вовлечению. Бюджет и количество блогеров показывают, какой ценой охват получен и на скольких людей размазан — $6,3K на шестерых и на тридцати это разные стратегии. Тональность держит риск: охват от блогера с негативным откликом работает против бренда.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>CPC считается мерой CPM.</b> Платформы не отдают клики по блогерским размещениям, а в ТЗ по направлению стоит CPM — определение метрики пока не согласовано, поэтому карточка помечена прямо на экране.</p></div>
+</div>
+</div>
+
+<!-- ==================== EVENTS ==================== -->
+<div data-page="ev" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="Events">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">Мероприятия</span></div>
+  <div class="b" style="left:40px;top:236px;width:1920px;height:118px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:24px;height:100%">
+      <div class="card hero"><span class="k-label">Посещаемость, факт / план</span><span class="k-val sm">18,4K / 20,2K</span><span class="k-sub">выполнение <b style="color:#1A1D1B">91,0%</b></span></div>
+      <div class="card"><span class="k-label">Стоимость живого контакта</span><span class="k-val sm">$0,69</span><span class="k-sub"><span class="delta up">▲ 4,2%</span></span></div>
+      <div class="card"><span class="k-label">Мероприятия</span><span class="k-val sm">10</span><span class="k-sub">6 завершено · 4 в работе</span></div>
+      <div class="card"><span class="k-label">Онлайн-контакты</span><span class="k-val sm">5,1K</span><span class="k-sub">упоминания за даты проведения</span></div>
+      <div class="card"><span class="k-label">NPS гостей</span><span class="k-val sm none">нет данных</span><span class="flag">НУЖНА ФОРМА ОПРОСА</span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:382px;width:1272px;height:330px"><div class="panel">
+    <h4>Посещаемость: план и факт</h4><div class="sub">по мероприятиям, июнь 2026</div>
+    <div class="legend"><span><i style="background:#B9CFC2"></i>План</span><span><i style="background:#1E8B4F"></i>Факт</span></div>
+    <div class="plot" data-chart="planfact"
+      data-rows='[["Digital Bridge Forum",10782,9666],["Expo Almaty",6667,6118],["Kaspi Tech Day",5749,5231],["Retail Event Astana",3418,2891],["Almaty Food Fest",2940,2706]]'></div>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:382px;width:624px;height:330px"><div class="panel">
+    <h4>Офлайн и онлайн контакты</h4><div class="sub">тысяч; онлайн — упоминания за даты проведения</div>
+    <div class="legend"><span><i style="background:#1E8B4F"></i>Офлайн</span><span><i style="background:#4A6FA5"></i>Онлайн</span></div>
+    <div class="plot" data-chart="grouped" data-fmt="k"
+      data-series='[["Офлайн","#1E8B4F"],["Онлайн","#4A6FA5"]]'
+      data-rows='[["Digital Bridge",9.7,2.1],["Expo Almaty",6.1,1.4],["Kaspi Tech",5.2,0.9],["Retail Event",2.9,0.4],["Food Fest",2.7,0.3]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:744px;width:1920px;height:341px"><div class="tbl roomy">
+    <header><h4>Мероприятия</h4><span class="more">Карточка мероприятия →</span></header>
+    <table>
+      <thead><tr><th>Мероприятие</th><th>Город</th><th>Дата</th><th>Бюджет</th><th>План</th><th>Факт</th><th>%</th><th>Онлайн</th><th>CPC</th><th>NPS</th></tr></thead>
+      <tbody>
+        <tr><td>Digital Bridge Forum 2026</td><td>Астана</td><td class="mono">12–14.06</td><td>$268K</td><td>10 782</td><td><b>9 666</b></td><td>89,6</td><td>2 140</td><td>$0,69</td><td class="dim">—</td></tr>
+        <tr><td>Expo Almaty Technology</td><td>Алматы</td><td class="mono">05–07.06</td><td>$196K</td><td>6 667</td><td><b>6 118</b></td><td>91,8</td><td>1 410</td><td>$0,71</td><td class="dim">—</td></tr>
+        <tr><td>Kaspi Tech Day</td><td>Алматы</td><td class="mono">21.06</td><td>$172K</td><td>5 749</td><td><b>5 231</b></td><td>91,0</td><td>920</td><td>$0,66</td><td class="dim">—</td></tr>
+        <tr><td>Retail Event Astana</td><td>Астана</td><td class="mono">18.06</td><td>$158K</td><td>3 418</td><td><b>2 891</b></td><td>84,6</td><td>380</td><td>$0,74</td><td class="dim">—</td></tr>
+        <tr><td>Almaty Food Fest</td><td>Алматы</td><td class="mono">28–29.06</td><td>$141K</td><td>2 940</td><td><b>2 706</b></td><td>92,0</td><td>290</td><td>$0,61</td><td class="dim">—</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>Мероприятия</h2>
+  <div class="who"><span>Задача: <b>понять, добираем ли мы людей и во сколько обходится живой контакт</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Выполняем ли план по посещаемости?</li>
+        <li>Сколько стоит один живой контакт и где он дороже всего?</li>
+        <li>Какие мероприятия дали отклик за пределами площадки?</li>
+        <li>Что гости думают о мероприятии?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Переформатировать или отменить площадку с выполнением ниже 85%</li>
+        <li>Сместить бюджет в город с лучшей стоимостью контакта</li>
+        <li>Усилить онлайн-поддержку там, где упоминаний почти нет</li>
+        <li>Запустить сбор NPS, чтобы закрыть требование ТЗ</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Посещаемость факт / план</b>пришли ли люди</span>
+          <span class="met main"><b>Стоимость контакта</b>почём каждый пришедший</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Онлайн-контакты</b>вышло ли за пределы площадки</span>
+          <span class="met"><b>Бюджет</b>масштаб ставки</span>
+          <span class="met"><b>NPS</b>качество впечатления</span>
+        </div>
+        <p>Мероприятие оценивается двумя величинами: <b>пришли ли люди</b> и <b>во сколько обошёлся каждый</b>. Остальное объясняет разброс: онлайн-контакты показывают, вышло ли событие за пределы площадки, бюджет — масштаб ставки, NPS — стоило ли оно того для гостя. Без пары «факт / план» цифра посещаемости бессмысленна: 9 666 человек — успех или провал, зависит от того, сколько обещали.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>Два пробела в данных.</b> NPS требует Google-формы для гостей — по ТЗ это обязательная метрика и критерий приёмки. Онлайн-контакты считаются как упоминания бренда в SemanticForce за даты проведения: отметки в сторис сторонними людьми в статистике аккаунта не видны, другого технического пути нет — механику нужно зафиксировать в методике.</p></div>
+</div>
+</div>
+
+<!-- ==================== BTL ==================== -->
+<div data-page="btl" hidden>
+<div class="stage"><div class="canvas" data-h="1125" data-nav="BTL">
+  <div class="b" style="left:40px;top:192px;width:700px;height:24px"><span class="ptitle">BTL-активации</span></div>
+  <div class="b" style="left:40px;top:236px;width:1920px;height:118px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:24px;height:100%">
+      <div class="card hero"><span class="k-label">Контакты</span><span class="k-val sm">8 612</span><span class="k-sub">план 9 320 · выполнение <b style="color:#1A1D1B">92,4%</b></span></div>
+      <div class="card"><span class="k-label">Стоимость контакта</span><span class="k-val sm">$0,64</span><span class="k-sub"><span class="delta dn">▼ 3,1%</span></span></div>
+      <div class="card"><span class="k-label">Точки</span><span class="k-val sm">34</span><span class="k-sub">5 активаций · 12 промоутеров</span></div>
+      <div class="card"><span class="k-label">Продажи с активации</span><span class="k-val sm none">нет данных</span><span class="flag">НУЖНА ФОРМА ПРОМОУТЕРА</span></div>
+      <div class="card"><span class="k-label">Конверсия в покупку</span><span class="k-val sm none">нет данных</span><span class="flag">НУЖНА ФОРМА ПРОМОУТЕРА</span></div>
+    </div>
+  </div>
+
+  <div class="b" style="left:40px;top:382px;width:1272px;height:330px"><div class="panel">
+    <h4>Контакты по типам активации</h4><div class="sub">план и факт, июнь 2026</div>
+    <div class="legend"><span><i style="background:#B9CFC2"></i>План</span><span><i style="background:#1E8B4F"></i>Факт</span></div>
+    <div class="plot" data-chart="planfact"
+      data-rows='[["Сэмплинг в сети",3640,3480],["Дегустация",2480,2210],["Промо у полки",1720,1602],["Розыгрыш",860,742],["Ивент-зона",620,578]]'></div>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:382px;width:624px;height:330px"><div class="panel">
+    <h4>Контакты по городам</h4><div class="sub">июнь 2026</div>
+    <div class="plot" data-chart="sources"
+      data-rows='[["Алматы",3480],["Астана",2210],["Шымкент",1340],["Караганда",920],["Актобе",662]]'></div>
+  </div></div>
+
+  <div class="b" style="left:40px;top:744px;width:1272px;height:341px"><div class="tbl roomy">
+    <header><h4>Активации</h4><span class="more">Все точки →</span></header>
+    <table>
+      <thead><tr><th>Активация</th><th>Тип</th><th>Точки</th><th>Промоутеры</th><th>Контакты</th><th>CPC</th><th>Продажи</th></tr></thead>
+      <tbody>
+        <tr><td>Сэмплинг Piala в Magnum</td><td class="dim">Сэмплинг</td><td>12</td><td>5</td><td><b>3 480</b></td><td>$0,58</td><td class="dim">—</td></tr>
+        <tr><td>Дегустация ASU в Small</td><td class="dim">Дегустация</td><td>9</td><td>3</td><td><b>2 210</b></td><td>$0,62</td><td class="dim">—</td></tr>
+        <tr><td>Da Da у полки</td><td class="dim">Промо</td><td>7</td><td>2</td><td><b>1 602</b></td><td>$0,67</td><td class="dim">—</td></tr>
+        <tr><td>Salam Cola розыгрыш</td><td class="dim">Розыгрыш</td><td>4</td><td>1</td><td><b>742</b></td><td>$0,74</td><td class="dim">—</td></tr>
+        <tr><td>Ивент-зона Food Fest</td><td class="dim">Ивент-зона</td><td>2</td><td>1</td><td><b>578</b></td><td>$0,81</td><td class="dim">—</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="b" style="left:1336px;top:744px;width:624px;height:341px"><div class="tbl">
+    <header><h4>Сдача отчётности</h4><span class="more">Напомнить →</span></header>
+    <table>
+      <thead><tr><th>Точка</th><th>Дата</th><th>Статус</th></tr></thead>
+      <tbody>
+        <tr><td>Magnum Достык</td><td class="mono">28.06</td><td style="color:#1E8B4F">Сдан</td></tr>
+        <tr><td>Magnum Сейфуллина</td><td class="mono">28.06</td><td style="color:#1E8B4F">Сдан</td></tr>
+        <tr><td>Small Абая</td><td class="mono">27.06</td><td style="color:#C77700">Без фото</td></tr>
+        <tr><td>Magnum Астана Сити</td><td class="mono">26.06</td><td style="color:#C0392B">Не сдан</td></tr>
+        <tr><td>Small Шымкент</td><td class="mono">25.06</td><td style="color:#C0392B">Не сдан</td></tr>
+        <tr><td class="dim">Всего 34 точки</td><td class="dim mono">июнь</td><td><b>29 из 34</b></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div></div>
+
+<div class="why">
+  <p class="eyebrow">Логика страницы</p><h2>BTL-активации</h2>
+  <div class="who"><span>Задача: <b>понять, какой формат в рознице работает дешевле</b></span></div>
+  <div class="cols">
+    <div>
+      <section><h3>На какие вопросы отвечает</h3><ul class="qs">
+        <li>Сколько контактов дала каждая точка и каждый формат?</li>
+        <li>Какой тип активации даёт контакт дешевле?</li>
+        <li>В каком городе стоит усилиться, а в каком свернуться?</li>
+        <li>Все ли промоутеры сдали отчёт и фотоотчёт?</li>
+      </ul></section>
+      <section><h3>Какие решения по ней принимают</h3><ul class="ds">
+        <li>Убрать формат с худшей стоимостью контакта из следующей волны</li>
+        <li>Переставить промоутеров на точки с большим трафиком</li>
+        <li>Добить сбор отчётности по точкам без данных</li>
+        <li>Запустить форму промоутера, чтобы появились продажи и конверсия</li>
+      </ul></section>
+    </div>
+    <div>
+      <section>
+        <h3>Главные метрики</h3>
+        <div class="mets">
+          <span class="met main"><b>Контакты</b>со сколькими поговорили</span>
+          <span class="met main"><b>Стоимость контакта</b>почём каждый разговор</span>
+        </div>
+        <h3>Поддерживают гипотезу</h3>
+        <div class="mets">
+          <span class="met"><b>Тип активации</b>откуда разброс в цене</span>
+          <span class="met"><b>Точки и промоутеры</b>масштаб развёртывания</span>
+          <span class="met"><b>Сдача отчётности</b>достоверность цифр</span>
+          <span class="met"><b>Продажи и конверсия</b>окупаемость</span>
+        </div>
+        <p>BTL меряется двумя вещами: <b>со сколькими людьми поговорили</b> и <b>почём вышел каждый разговор</b>. Тип активации и точки объясняют разброс: сэмплинг в сети даёт контакт за $0,58, ивент-зона — за $0,81, и это прямое основание для следующей волны. Блок сдачи отчётности стоит на странице не для порядка: цифры по точкам без отчёта недостоверны, сейчас не закрыто 5 точек из 34.</p>
+      </section>
+    </div>
+  </div>
+  <div class="note"><p><b>Продажи и конверсия пусты по причине.</b> По ТЗ (п. 3.5) форму промоутера — до 8 полей, с валидацией и автозагрузкой в BigQuery — разрабатывает агентство. Пока формы нет, две обязательные метрики останутся без источника, и это критерий приёмки.</p></div>
+</div>
+</div>
+
+<!-- ==================== СПЕЦИФИКАЦИЯ ==================== -->
+<div data-page="spec" hidden><div class="spec">
+  <h2>Спецификация для сборки в Power BI</h2>
+  <p>Значения ниже применены в макете. Координаты задаются числами в панели формата, не перетаскиванием.</p>
+
+  <h3>Архитектура: шесть дашбордов по ТЗ</h3>
+  <div class="tw"><table>
+    <tr><th>Страница</th><th>Тип</th><th>Главные метрики</th></tr>
+    <tr><td>Overview</td><td>сводная</td><td>Охват · Бюджет</td></tr>
+    <tr><td>SMM</td><td>направление</td><td>Охват · ER</td></tr>
+    <tr><td>SMM · Instagram</td><td>детализация SMM</td><td>Охват · ER</td></tr>
+    <tr><td>SMM · TikTok</td><td>детализация SMM</td><td>Охват · Досматриваемость</td></tr>
+    <tr><td>PR</td><td>направление</td><td>Упоминания · Тональность</td></tr>
+    <tr><td>Influence</td><td>направление</td><td>Охват · ER</td></tr>
+    <tr><td>Events</td><td>направление</td><td>Посещаемость факт/план · Стоимость контакта</td></tr>
+    <tr><td>BTL</td><td>направление</td><td>Контакты · Стоимость контакта</td></tr>
+  </table></div>
+  <p style="margin-top:10px">По ТЗ заявлено шесть дашбордов — здесь их шесть: сводная и пять направлений. Instagram и TikTok не отдельные направления, а детализация SMM: у них разные механики и разный набор данных, свести их в одну страницу без потери смысла нельзя.</p>
+
+  <h3>Правило главных и поддерживающих метрик</h3>
+  <ul>
+    <li><b>Главных метрик на странице две.</b> Они отвечают на вопрос «хорошо или плохо» и стоят первыми в KPI-ряду.</li>
+    <li><b>Поддерживающие объясняют главные.</b> Если метрика не помогает понять, почему главная такая, — на этой странице она лишняя.</li>
+    <li><b>Метрика без сравнения — не метрика.</b> У каждой карточки либо дельта к прошлому периоду, либо план рядом с фактом.</li>
+    <li><b>Пробел в данных показывается, а не прячется.</b> Карточка «нет данных» с пометкой источника работает как задача; прочерк в матрице — тоже.</li>
+  </ul>
+
+  <h3>Сетка</h3>
+  <div class="tw"><table>
+    <tr><th>Параметр</th><th>Значение</th><th>Комментарий</th></tr>
+    <tr><td>Холст</td><td class="m">2000 × 1125</td><td>16:9, одна страница — один экран</td></tr>
+    <tr><td>Поля</td><td class="m">40</td><td>слева, справа и снизу</td></tr>
+    <tr><td>Колонки</td><td class="m">6 × 300</td><td>старт по X: 40 · 364 · 688 · 1012 · 1336 · 1660</td></tr>
+    <tr><td>Жёлоб</td><td class="m">24</td><td>между блоками одного ряда</td></tr>
+    <tr><td>Шапка</td><td class="m">0–96</td><td>зелёная полоса, один слой</td></tr>
+    <tr><td>Панель фильтров</td><td class="m">96–160</td><td>белая, нижняя граница 1 px</td></tr>
+    <tr><td>Контент начинается</td><td class="m">y = 192</td><td>заголовок страницы</td></tr>
+  </table></div>
+
+  <h3>Готовые ширины и высоты</h3>
+  <div class="tw"><table>
+    <tr><th>Карточек в ряду</th><th>Ширина</th><th>Элемент</th><th>Высота</th></tr>
+    <tr><td>4</td><td class="m">462</td><td>KPI-карточка</td><td class="m">112</td></tr>
+    <tr><td>5</td><td class="m">364</td><td>KPI-карточка с пометкой</td><td class="m">118</td></tr>
+    <tr><td>6</td><td class="m">300</td><td>Блок направления</td><td class="m">244</td></tr>
+    <tr><td>7</td><td class="m">254</td><td>График</td><td class="m">325–355</td></tr>
+    <tr><td>блок 3 колонки</td><td class="m">948</td><td>Высокий график</td><td class="m">414</td></tr>
+    <tr><td>блок 4 колонки</td><td class="m">1272</td><td>Таблица 3 / 5 строк</td><td class="m">184 / 341</td></tr>
+  </table></div>
+
+  <h3>Типографика — шесть ролей</h3>
+  <div class="tw"><table>
+    <tr><th>Роль</th><th>Кегль</th><th>Начертание</th><th>Цвет</th></tr>
+    <tr><td>Заголовок страницы</td><td class="m">22</td><td>Semibold</td><td class="m">#1A1D1B</td></tr>
+    <tr><td>Заголовок визуала</td><td class="m">15</td><td>Semibold</td><td class="m">#1A1D1B</td></tr>
+    <tr><td>Заголовок секции</td><td class="m">11</td><td>Semibold, caps, трекинг .1em</td><td class="m">#6B756F</td></tr>
+    <tr><td>Значение KPI</td><td class="m">32 / 28</td><td>Semibold, tabular</td><td class="m">#1A1D1B</td></tr>
+    <tr><td>Подпись KPI</td><td class="m">13</td><td>Medium</td><td class="m">#6B756F</td></tr>
+    <tr><td>Оси, легенда, таблицы</td><td class="m">12</td><td>Regular</td><td class="m">#6B756F</td></tr>
+  </table></div>
+  <p style="margin-top:10px">Шрифт в Power BI остаётся <b>DIN</b>. В макете — Barlow, ближайший доступный в вебе гротеск того же строя.</p>
+
+  <h3>Палитра</h3>
+  <div class="sw">
+    <div><i style="background:#1E8B4F"></i><span><b>#1E8B4F</b>бренд, данные 1</span></div>
+    <div><i style="background:#156137"></i><span><b>#156137</b>тёмный</span></div>
+    <div><i style="background:#B9CFC2"></i><span><b>#B9CFC2</b>план, фон серии</span></div>
+    <div><i style="background:#4A6FA5"></i><span><b>#4A6FA5</b>данные 2</span></div>
+    <div><i style="background:#C77700"></i><span><b>#C77700</b>данные 3, внимание</span></div>
+    <div><i style="background:#C0392B"></i><span><b>#C0392B</b>негатив</span></div>
+    <div><i style="background:#C9CFCB"></i><span><b>#C9CFCB</b>нейтрал</span></div>
+    <div><i style="background:#E3E8E4"></i><span><b>#E3E8E4</b>линии, сетка</span></div>
+    <div><i style="background:#F4F6F4"></i><span><b>#F4F6F4</b>фон страницы</span></div>
+    <div><i style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #E3E8E4"></i><span><b>#FFFFFF</b>карточка</span></div>
+  </div>
+  <p style="margin-top:12px">Пары «план / факт» строятся тоном, а не двумя цветами: план — светлый <b>#B9CFC2</b>, факт — плотный <b>#1E8B4F</b>. Это снимает эффект светофора и оставляет янтарный для «внимания».</p>
+
+  <h3>Карточка и графики</h3>
+  <ul>
+    <li>Карточка: фон <b>#FFFFFF</b>, рамка <b>1 px #E3E8E4</b>, радиус <b>10</b>, поля <b>18 / 20</b>. Теней нет.</li>
+    <li>Единственный акцент — левая полоса <b>3 px #1E8B4F</b> на одной главной карточке экрана.</li>
+    <li>Горизонтальная сетка <b>#E3E8E4</b> 1 px, вертикальной нет. Задаётся один раз в теме отчёта.</li>
+    <li>Заголовки осей выключены, легенда сверху слева без заголовка, 12 pt.</li>
+    <li><b>Стопка — только когда важна сумма.</b> Когда сравнивают категории между собой, столбики группируются.</li>
+    <li>Метрика на согласовании несёт пометку прямо на карточке, а не в подсказке.</li>
+  </ul>
+
+  <h3>Что исправлено относительно текущего макета</h3>
+  <ul>
+    <li><b>Шапка 220 → 160 px</b>, янтарная полоса стала белой панелью фильтров.</li>
+    <li><b>Страница = один экран.</b> Детальные таблицы свёрнуты до трёх строк с кнопкой на полный список.</li>
+    <li><b>Шесть кеглей вместо восемнадцати</b>, один зелёный вместо шести, один красный вместо трёх.</li>
+    <li><b>Рамки светлые, теней нет</b> — иерархию держит отступ.</li>
+    <li><b>Events и BTL разведены:</b> у мероприятий главная пара «посещаемость факт/план + стоимость контакта», у BTL — «контакты + стоимость контакта», наборы визуалов разные.</li>
+    <li><b>TikTok получил свои метрики</b> — досматриваемость, время просмотра, репосты — вместо копии Instagram.</li>
+    <li><b>Тональность в PR сгруппирована</b>, облако фраз заменено блоком «Требуют реакции», пузырьковая диаграмма — барами с дорожкой ER.</li>
+  </ul>
+</div></div>
+
+</div>
+
+<script>
+(function(){
+  var C={ink:'#1A1D1B',body:'#414944',muted:'#6B756F',line:'#E3E8E4',
+         d1:'#1E8B4F',d2:'#4A6FA5',d3:'#C77700',tint:'#B9CFC2'};
+  var NAV=['Overview','SMM','Instagram','TikTok','PR','Influence','Events','BTL'];
+
+  document.querySelectorAll('.canvas').forEach(function(cv){
+    var on=cv.dataset.nav||'Overview';
+    var h=document.createElement('div');
+    h.innerHTML='<div class="band"></div>'+
+      '<div class="logo"><span class="mark"><i></i><i></i><i></i></span>'+
+      '<span><b>RG BRANDS</b><span>FOR A LIFE</span></span></div>'+
+      '<nav class="nav">'+NAV.map(function(n){
+        return '<a href="#"'+(n===on?' class="on"':'')+'>'+n+'</a>';}).join('')+'</nav>'+
+      '<div class="fbar"><span class="stamp">Данные обновлены <b>16.09.2026, 08:40</b></span>'+
+      '<span class="demo">ДЕМО-ДАННЫЕ</span><div class="filters">'+
+      [['Период','Июнь 2026'],['Бренд','Все бренды'],['Диапазон дат','01.06 — 30.06']].map(function(f){
+        return '<div class="fl"><label>'+f[0]+'</label><div class="ctl">'+f[1]+
+          '<svg width="10" height="6" aria-hidden="true"><path d="M0 0l5 6 5-6z" fill="#6B756F"/></svg></div></div>';
+      }).join('')+'</div></div>';
+    var frag=document.createDocumentFragment();
+    while(h.firstChild) frag.appendChild(h.firstChild);
+    cv.insertBefore(frag, cv.firstChild);
+  });
+
+  function el(n,a){var e=document.createElementNS('http://www.w3.org/2000/svg',n);
+    for(var k in a) e.setAttribute(k,a[k]); return e;}
+  function txt(x,y,s,o){o=o||{};var t=el('text',{x:x,y:y,fill:o.fill||C.muted,'font-size':o.size||12,
+    'font-family':'Barlow, sans-serif','font-weight':o.w||400,'text-anchor':o.anchor||'start'});
+    t.textContent=s; return t;}
+  function size(b){return [Math.max(b.clientWidth||600,120),Math.max(b.clientHeight||200,80)];}
+  function svg(b,W,H){var s=el('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',height:'100%'});b.appendChild(s);return s;}
+  function nice(v){return v>=1000?(v/1000).toFixed(v>=10000?0:1).replace('.',',')+'K':String(v).replace('.',',');}
+  function ru(v){return v.toLocaleString('ru-RU');}
+
+  function spark(b,vals){
+    var z=size(b),W=z[0],H=z[1],p=6,mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals);
+    var s=svg(b,W,H),d='',n=vals.length;
+    vals.forEach(function(v,i){var x=p+i*(W-2*p)/(n-1),y=H-p-(v-mn)/((mx-mn)||1)*(H-2*p);
+      d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);});
+    s.appendChild(el('path',{d:d+'L'+(W-p)+' '+(H-p)+'L'+p+' '+(H-p)+'Z',fill:C.d1,'fill-opacity':'.10'}));
+    s.appendChild(el('path',{d:d,fill:'none',stroke:C.d1,'stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    s.appendChild(el('circle',{cx:W-p,cy:H-p-(vals[n-1]-mn)/((mx-mn)||1)*(H-2*p),r:4,fill:C.d1}));
+  }
+
+  function lines(b,a,bb,labels,scaleB){
+    var z=size(b),W=z[0],H=z[1],L=54,R=58,T=14,B=30;
+    var s=svg(b,W,H),mx=Math.max.apply(null,a.concat(bb)),step=Math.ceil(mx/4/50)*50,top=step*4;
+    for(var i=0;i<=4;i++){var y=T+(H-T-B)*(1-i/4);
+      s.appendChild(el('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:C.line,'stroke-width':1}));
+      s.appendChild(txt(L-10,y+4,nice(step*i),{anchor:'end',size:12}));}
+    function path(v,col,lbl){var d='';
+      v.forEach(function(p,i){var x=L+i*(W-L-R)/(v.length-1),y=T+(H-T-B)*(1-p/top);
+        d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);});
+      s.appendChild(el('path',{d:d,fill:'none',stroke:col,'stroke-width':2.5,'stroke-linejoin':'round'}));
+      var lx=W-R,ly=T+(H-T-B)*(1-v[v.length-1]/top);
+      s.appendChild(el('circle',{cx:lx,cy:ly,r:4.5,fill:col}));
+      s.appendChild(txt(lx+9,ly+5,lbl,{anchor:'start',size:13,w:600,fill:col}));}
+    path(a,C.d1,nice(a[a.length-1]*1000));
+    path(bb,C.d2,scaleB?(bb[bb.length-1]/scaleB).toFixed(1).replace('.',',')+'%':nice(bb[bb.length-1]*1000));
+    labels.forEach(function(t,i){if(i%2)return;
+      s.appendChild(txt(L+i*(W-L-R)/(labels.length-1),H-8,t,{anchor:'middle',size:12}));});
+  }
+
+  function planfact(b,rows){
+    var z=size(b),W=z[0],H=z[1],L=Math.min(210,W*0.2),R=80,T=4,gap=12;
+    var s=svg(b,W,H),mx=Math.max.apply(null,rows.map(function(r){return r[1];}));
+    var rowH=(H-T)/rows.length,bh=(rowH-gap)/2;
+    rows.forEach(function(r,i){var y=T+i*rowH;
+      s.appendChild(txt(L-14,y+rowH/2,r[0],{anchor:'end',size:13,fill:C.ink,w:500}));
+      var wp=(W-L-R)*r[1]/mx,wf=(W-L-R)*r[2]/mx;
+      s.appendChild(el('rect',{x:L,y:y,width:wp,height:bh,fill:C.tint,rx:3}));
+      s.appendChild(el('rect',{x:L,y:y+bh+4,width:wf,height:bh,fill:C.d1,rx:3}));
+      s.appendChild(txt(L+wp+10,y+bh-3,ru(r[1]),{size:12}));
+      s.appendChild(txt(L+wf+10,y+bh*2+1,ru(r[2]),{size:12,fill:C.ink,w:600}));});
+  }
+
+  function grouped(b,rows,series,fmt){
+    var z=size(b),W=z[0],H=z[1],L=48,R=14,T=22,B=30,s=svg(b,W,H);
+    var vals=[]; rows.forEach(function(r){for(var i=1;i<r.length;i++) vals.push(r[i]);});
+    var mx=Math.max.apply(null,vals),raw=mx/4;
+    var step=raw>=100?Math.ceil(raw/50)*50:(raw>=10?Math.ceil(raw/5)*5:(raw>=1?Math.ceil(raw):Math.ceil(raw*10)/10));
+    var top=step*4;
+    function fm(v){return String(+v.toFixed(1)).replace('.',',');}
+    for(var i=0;i<=4;i++){var y=T+(H-T-B)*(1-i/4);
+      s.appendChild(el('line',{x1:L,y1:y,x2:W-R,y2:y,stroke:C.line,'stroke-width':1}));
+      s.appendChild(txt(L-10,y+4,fm(step*i),{anchor:'end',size:12}));}
+    var base=T+(H-T-B),cw=(W-L-R)/rows.length,n=series.length;
+    var inner=Math.min(cw*0.7,n*58),bw=inner/n-6;
+    rows.forEach(function(r,i){
+      var cx=L+cw*(i+0.5);
+      for(var j=0;j<n;j++){
+        var v=r[j+1],h=(H-T-B)*v/top,x=cx-inner/2+j*(inner/n)+3;
+        s.appendChild(el('rect',{x:x,y:base-h,width:bw,height:h,fill:series[j][1],rx:2}));
+        s.appendChild(txt(x+bw/2,base-h-7,fm(v),{anchor:'middle',size:12,w:600,fill:C.ink}));}
+      s.appendChild(txt(cx,H-10,r[0],{anchor:'middle',size:12}));});
+  }
+
+  function sources(b,rows,unit,scale,prefix,dec){
+    var z=size(b),W=z[0],H=z[1],L=Math.min(210,W*0.36),R=Math.min(90,W*0.17),T=2;
+    var s=svg(b,W,H),mx=Math.max.apply(null,rows.map(function(r){return r[1];}));
+    var rowH=(H-T)/rows.length,bh=Math.min(22,rowH-7);
+    rows.forEach(function(r,i){var y=T+i*rowH+(rowH-bh)/2;
+      s.appendChild(txt(L-14,y+bh/2+4,r[0],{anchor:'end',size:13,fill:C.ink,w:500}));
+      var w=Math.max((W-L-R)*r[1]/mx,3);
+      s.appendChild(el('rect',{x:L,y:y,width:w,height:bh,fill:C.d1,rx:3}));
+      var v=scale?(r[1]*scale).toFixed(dec||1).replace('.',','):ru(r[1]);
+      s.appendChild(txt(L+w+10,y+bh/2+4,(prefix||'')+v+(unit||''),{size:12,fill:C.ink,w:600}));});
+  }
+
+  function bloggers(b,rows){
+    var z=size(b),W=z[0],H=z[1],T=6,s=svg(b,W,H);
+    var L=Math.min(230,W*0.25),ERW=Math.min(160,W*0.18),GAP=30;
+    var barEnd=W-ERW-GAP,lane=barEnd-L-64;
+    var mx=Math.max.apply(null,rows.map(function(r){return r[1];}));
+    var mer=Math.max.apply(null,rows.map(function(r){return r[2];}));
+    var rowH=(H-T-24)/rows.length,bh=Math.min(26,rowH-16);
+    s.appendChild(txt(L+2,14,'ОХВАТ',{size:10,w:600}));
+    s.appendChild(txt(barEnd+GAP,14,'ВОВЛЕЧЁННОСТЬ, ER %',{size:10,w:600}));
+    rows.forEach(function(r,i){var y=T+24+i*rowH+(rowH-bh)/2;
+      s.appendChild(txt(L-16,y+bh/2+5,r[0],{anchor:'end',size:13,fill:C.ink,w:500}));
+      var w=Math.max(lane*r[1]/mx,3);
+      s.appendChild(el('rect',{x:L,y:y,width:w,height:bh,fill:C.d1,rx:3}));
+      s.appendChild(txt(L+w+10,y+bh/2+5,(r[1]/1000).toFixed(2).replace('.',',')+'M',{size:12,fill:C.ink,w:600}));
+      var ew=Math.max(ERW*0.6*r[2]/mer,3);
+      s.appendChild(el('rect',{x:barEnd+GAP,y:y+bh/2-5,width:ew,height:10,fill:C.d3,rx:2}));
+      s.appendChild(txt(barEnd+GAP+ERW*0.64,y+bh/2+5,r[2].toFixed(1).replace('.',','),{size:12,fill:C.d3,w:600}));});
+  }
+
+  function demog(b,groups){
+    var z=size(b),W=z[0],H=z[1],s=svg(b,W,H),y=6;
+    var total=0; groups.forEach(function(g){total+=g[1].length;});
+    var head=22,gap=10;
+    var rh=Math.max(18,Math.min(26,(H-6-groups.length*head-(groups.length-1)*gap)/total));
+    var bh=Math.min(16,rh-7);
+    groups.forEach(function(g){
+      s.appendChild(txt(0,y+10,g[0],{size:12,w:600}));
+      y+=head;
+      g[1].forEach(function(r){
+        s.appendChild(txt(0,y+bh-2,r[0],{size:13,fill:C.ink,w:500}));
+        s.appendChild(el('rect',{x:130,y:y,width:W-200,height:bh,fill:'#F0F3F1',rx:3}));
+        s.appendChild(el('rect',{x:130,y:y,width:(W-200)*r[1]/100,height:bh,fill:C.d1,rx:3}));
+        s.appendChild(txt(W,y+bh-2,r[1].toFixed(1).replace('.',',')+'%',{anchor:'end',size:12,fill:C.ink,w:600}));
+        y+=rh;});
+      y+=gap;});
+  }
+
+  function draw(box){
+    box.innerHTML='';
+    var k=box.getAttribute('data-chart');
+    function J(a){return JSON.parse(box.getAttribute(a));}
+    try{
+      if(k==='spark') spark(box,box.getAttribute('data-values').split(',').map(Number));
+      else if(k==='lines') lines(box,box.getAttribute('data-a').split(',').map(Number),
+        box.getAttribute('data-b').split(',').map(Number),box.getAttribute('data-labels').split(','),
+        parseFloat(box.getAttribute('data-scale-b')||'0'));
+      else if(k==='planfact') planfact(box,J('data-rows'));
+      else if(k==='grouped') grouped(box,J('data-rows'),J('data-series'),box.getAttribute('data-fmt'));
+      else if(k==='sources') sources(box,J('data-rows'),box.getAttribute('data-unit'),
+        parseFloat(box.getAttribute('data-scale')||'0'),box.getAttribute('data-prefix'),
+        parseInt(box.getAttribute('data-dec')||'1',10));
+      else if(k==='bloggers') bloggers(box,J('data-rows'));
+      else if(k==='demo') demog(box,J('data-groups'));
+    }catch(e){}
+  }
+  function drawAll(){document.querySelectorAll('[data-chart]').forEach(draw);}
+
+  function fit(){
+    document.querySelectorAll('.stage').forEach(function(st){
+      var cv=st.querySelector('.canvas'); if(!cv) return;
+      var w=st.clientWidth; if(!w) return;
+      var h=+cv.dataset.h,sc=w/2000;
+      cv.style.height=h+'px'; cv.style.transform='scale('+sc+')';
+      st.style.height=(h*sc)+'px';});
+  }
+  function show(id){
+    document.querySelectorAll('[data-page]').forEach(function(n){n.hidden=(n.dataset.page!==id);});
+    document.querySelectorAll('#tabs button').forEach(function(b){
+      b.setAttribute('aria-selected',b.dataset.p===id?'true':'false');});
+    fit(); drawAll();}
+  document.getElementById('tabs').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(b) show(b.dataset.p);});
+  window.addEventListener('resize',function(){fit();drawAll();});
+  fit(); drawAll();
+})();
+</script>
+</body>
+</html>
